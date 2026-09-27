@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Orora AgriTech</title>
+  <meta name="description" content="Offline poultry health check from a droppings photo.">
+  <meta name="theme-color" content="#1F5E5C">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">
+      <span class="wordmark">ORORA</span><span class="dash">—</span><span class="product">AgriTech</span>
+    </div>
+    <div class="bar-right">
+      <span id="net" class="pill" aria-live="polite"></span>
+      <select id="lang" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+        <option value="rn">RN</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="mock-banner" class="banner danger" hidden></div>
+  <div id="lang-banner" class="banner" hidden></div>
+
+  <main>
+    <!-- Capture -->
+    <section id="view-capture" class="view">
+      <h1 data-i18n="title"></h1>
+      <p class="lead" data-i18n="lead"></p>
+
+      <label class="field">
+        <span data-i18n="batchLabel"></span>
+        <input id="batch" type="text" inputmode="text" autocomplete="off" placeholder="B-001">
+      </label>
+
+      <label class="capture" for="photo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span data-i18n="takePhoto"></span>
+      </label>
+      <input id="photo" type="file" accept="image/*" capture="environment" hidden>
+
+      <ul class="tips">
+        <li data-i18n="tip1"></li>
+        <li data-i18n="tip2"></li>
+        <li data-i18n="tip3"></li>
+      </ul>
+      <p id="model-status" class="muted small"></p>
+    </section>
+
+    <!-- Result -->
+    <section id="view-result" class="view" hidden>
+      <img id="preview" alt="" class="preview">
+      <div id="result-card" class="card">
+        <p class="eyebrow" data-i18n="result"></p>
+        <h2 id="result-title"></h2>
+        <p id="result-conf" class="muted"></p>
+        <div id="bars" class="bars"></div>
+      </div>
+
+      <div id="advice-card" class="card advice">
+        <p class="eyebrow" data-i18n="whatToDo"></p>
+        <ol id="advice"></ol>
+      </div>
+
+      <div class="actions">
+        <a id="sms" class="btn primary" href="#" data-i18n="sendVet"></a>
+        <button id="again" class="btn" type="button" data-i18n="another"></button>
+      </div>
+      <p class="muted small" data-i18n="disclaimer"></p>
+      <p class="muted small" data-i18n="smsNote"></p>
+    </section>
+
+    <!-- Records -->
+    <section id="view-records" class="view" hidden>
+      <h1 data-i18n="records"></h1>
+      <p class="muted" data-i18n="recordsNote"></p>
+      <div id="record-list"></div>
+      <div class="actions">
+        <button id="export" class="btn" type="button" data-i18n="exportCsv"></button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button type="button" data-view="capture" class="active" data-i18n="tabCheck"></button>
+    <button type="button" data-view="records" data-i18n="tabRecords"></button>
+  </nav>
+
+  <footer class="foot">
+    <span>Orora Agro Group</span> · <span data-i18n="credits"></span>
+  </footer>
+
+  <!-- TensorFlow.js (cached by the service worker for offline use) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

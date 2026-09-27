@@ -1,0 +1,83 @@
+/* Orora AgriTech — offline demo. Brand: teal #1F5E5C, orange #E97132, grey #5A5A5A. */
+:root {
+  --teal: #1F5E5C; --teal-mid: #3E8E8B; --sage: #8FB9B5; --orange: #E97132; --orange-ink: #B4521C;
+  --grey: #5A5A5A; --ink: #1C2826; --muted: #5E6C6A; --line: #D5E2E0;
+  --bg: #F6F8F7; --card: #FFFFFF; --tint: #EAF1F0; --head: #DCE8E7;
+  --ok: #1F5E5C; --warn: #B4521C; --danger: #A8322A;
+  font-family: Aptos, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink); background: var(--bg);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E8EFEE; --muted: #A9BBB8; --line: #2F4644; --bg: #0F1D1C; --card: #16292A;
+    --tint: #1B3533; --head: #1F3B39; --orange-ink: #F2A477; --teal: #5FB3AE; --danger: #E0786F;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); }
+body { min-height: 100dvh; display: flex; flex-direction: column; font-size: 17px; line-height: 1.45; }
+
+.bar { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: #1F5E5C; color: #F3F7F6; border-bottom: 3px solid var(--orange); }
+.brand { font-weight: 700; letter-spacing: .06em; }
+.brand .dash { color: var(--orange); margin: 0 6px; }
+.brand .product { font-weight: 500; letter-spacing: 0; }
+.bar-right { display: flex; gap: 8px; align-items: center; }
+.bar select { background: #164846; color: #F3F7F6; border: 1px solid #3E8E8B; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 15px; }
+.pill { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: #164846; }
+.pill.off { background: #E97132; color: #1C2826; }
+
+.banner { padding: 10px 16px; font-size: 15px; background: var(--tint); color: var(--ink); border-bottom: 1px solid var(--line); }
+.banner.danger { background: #A8322A; color: #FFF6F4; font-weight: 600; }
+
+main { flex: 1; width: 100%; max-width: 560px; margin: 0 auto; padding: 20px 16px 96px; }
+.view h1 { font-size: 26px; line-height: 1.2; color: var(--teal); margin: 4px 0 8px; }
+.lead { margin: 0 0 20px; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; font-size: 15px; color: var(--muted); }
+.field input { font: inherit; font-size: 17px; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+
+.capture { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  min-height: 190px; border-radius: 16px; background: var(--teal); color: #F3F7F6; font-size: 20px; font-weight: 600;
+  cursor: pointer; box-shadow: 0 6px 18px rgba(31, 94, 92, .25); }
+.capture svg { width: 56px; height: 56px; }
+.capture:active { transform: scale(.99); }
+.tips { margin: 18px 0 8px; padding-left: 20px; color: var(--muted); font-size: 15px; }
+.tips li { margin-bottom: 4px; }
+
+.preview { width: 100%; max-height: 280px; object-fit: cover; border-radius: 14px; background: var(--tint); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-top: 14px; }
+.card.level-ok { border-top: 6px solid var(--teal); }
+.card.level-warn { border-top: 6px solid var(--orange); }
+.card.level-urgent { border-top: 6px solid var(--danger); }
+.card.level-unclear { border-top: 6px dashed var(--sage); }
+.eyebrow { margin: 0 0 4px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--orange-ink); }
+#result-title { margin: 0; font-size: 26px; line-height: 1.2; }
+#result-conf { margin: 4px 0 12px; }
+.bars { display: grid; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: 1fr 52px; gap: 6px 10px; font-size: 14px; align-items: center; }
+.bar-row .track { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: var(--tint); overflow: hidden; }
+.bar-row .fill { height: 100%; background: var(--teal-mid); }
+.bar-row.top .fill { background: var(--teal); }
+.bar-row .pct { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.advice ol { margin: 6px 0 0; padding-left: 22px; }
+.advice li { margin-bottom: 8px; }
+
+.actions { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 12px; }
+.btn { display: block; text-align: center; font: inherit; font-size: 17px; font-weight: 600; padding: 14px 16px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); text-decoration: none; cursor: pointer; }
+.btn.primary { background: var(--orange); border-color: var(--orange); color: #1C2826; }
+.btn.primary.urgent { background: var(--danger); border-color: var(--danger); color: #FFF6F4; }
+
+.record { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; font-size: 15px; }
+.record b { color: var(--teal); }
+.record .meta { color: var(--muted); font-size: 13px; }
+
+.tabs { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--card); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom); z-index: 5; }
+.tabs button { flex: 1; font: inherit; font-size: 15px; font-weight: 600; padding: 14px 8px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.tabs button.active { color: var(--teal); box-shadow: inset 0 3px 0 var(--orange); }
+.foot { text-align: center; font-size: 12px; color: var(--muted); padding: 8px 16px 72px; }
+.foot span:first-child { color: var(--teal); font-weight: 600; }

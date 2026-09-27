@@ -1,0 +1,24 @@
+# Code only: OAG business documents stay on OneDrive, not in the repo
+*.docx
+*.pdf
+*.pptx
+*.xlsx
+_build/*
+!_build/make_notebook.py
+
+# Local tooling
+.claude/
+__pycache__/
+.ipynb_checkpoints/
+node_modules/
+
+# Data never goes in git (download in Colab instead)
+data/
+*.zip
+*.tar
+cache_resized*
+orora_photos/
+
+# Screenshots and notes at the top level
+/*.png
+/*.jpg
