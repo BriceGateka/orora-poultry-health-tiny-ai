@@ -54,7 +54,6 @@ import keras
 from PIL import Image, ImageOps
 import imagehash
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.metrics import classification_report, confusion_matrix
 print("TensorFlow", tf.__version__, "| Keras", keras.__version__)
@@ -225,17 +224,45 @@ v2 = v2[v2.dist_to_pcr > DEDUP_HAMMING].reset_index(drop=True)
 # also drop exact duplicates inside v2 so they cannot straddle train and test
 before = len(v2); v2 = v2.drop_duplicates("hash").reset_index(drop=True)
 print(f"exact duplicates inside v2 removed: {before - len(v2)}")
+
+# Near-duplicates inside v2 (the same pile photographed twice) are GROUPED, not removed:
+# a group always lands entirely in train, or val, or test — so the test set is honest.
+bits = np.array([to_int(h) for h in v2.hash], dtype=np.uint64)
+popcount = getattr(np, "bitwise_count", None) or (
+    lambda a: np.unpackbits(a.view(np.uint8).reshape(-1, 8), axis=1).sum(1))
+parent = list(range(len(bits)))
+def find(i):
+    while parent[i] != i:
+        parent[i] = parent[parent[i]]; i = parent[i]
+    return i
+for i in range(len(bits)):
+    near = np.nonzero(popcount(np.bitwise_xor(bits[i + 1:], bits[i])) <= DEDUP_HAMMING)[0] + i + 1
+    for j in near:
+        ri, rj = find(i), find(int(j))
+        if ri != rj: parent[rj] = ri
+v2["group"] = [find(i) for i in range(len(bits))]
+sizes = v2.group.value_counts()
+print(f"near-duplicate groups: {int((sizes > 1).sum())} groups covering {int(sizes[sizes > 1].sum())} images")
 """)
 
 # --------------------------------------------------------------------------
-md("## 5 · Train / validation / test split (70 / 15 / 15, stratified)")
+md("## 5 · Train / validation / test split (≈70 / 15 / 15, stratified, near-duplicates kept together)")
 code(r"""
+from sklearn.model_selection import StratifiedGroupKFold
+
 if SUBSET_PER_CLASS:
     v2 = v2.groupby("cls", group_keys=False).apply(
         lambda g: g.sample(min(len(g), SUBSET_PER_CLASS), random_state=SEED))
 
-train_df, tmp = train_test_split(v2, test_size=0.30, stratify=v2.cls, random_state=SEED)
-val_df, test_df = train_test_split(tmp, test_size=0.50, stratify=tmp.cls, random_state=SEED)
+def group_split(d, n_splits):
+    # one fold (≈1/n_splits) out, keeping every near-duplicate group on one side
+    sgkf = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    keep, out = next(sgkf.split(d, d.cls, groups=d.group))
+    return d.iloc[keep], d.iloc[out]
+
+rest, test_df = group_split(v2, 7)        # ≈15% test
+train_df, val_df = group_split(rest, 6)   # ≈15% of the total for validation
+assert not set(train_df.group) & set(test_df.group), "near-duplicate leak between train and test"
 pcr_df = pcr.copy()
 
 for name, d in [("train", train_df), ("val", val_df), ("test", test_df), ("pcr", pcr_df)]:
@@ -437,7 +464,11 @@ for p in [int8_path, fp16_path]:
 """)
 code(r"""
 def tflite_predict(path, d):
-    it = tf.lite.Interpreter(model_path=str(path)); it.allocate_tensors()
+    # The default XNNPACK delegate cannot prepare some int8 MobileNetV3 ops on the Colab CPU;
+    # the plain built-in kernels run everything. (Phones use their own delegates.)
+    it = tf.lite.Interpreter(model_path=str(path),
+        experimental_op_resolver_type=tf.lite.experimental.OpResolverType.BUILTIN_WITHOUT_DEFAULT_DELEGATES)
+    it.allocate_tensors()
     inp, out = it.get_input_details()[0], it.get_output_details()[0]
     preds = []
     for p in d.path:
@@ -455,9 +486,12 @@ def tflite_predict(path, d):
 keras_pred = model.predict(test_ds, verbose=0).argmax(1)
 y_true = test_df.cls.map(cls_idx).values
 for p in [fp16_path, int8_path]:
-    tp = tflite_predict(p, test_df)
-    print(f"{p.name}: agrees with Keras on {(tp == keras_pred).mean():.1%} | "
-          f"accuracy {(tp == y_true).mean():.1%} vs Keras {(keras_pred == y_true).mean():.1%}")
+    try:
+        tp = tflite_predict(p, test_df)
+        print(f"{p.name}: agrees with Keras on {(tp == keras_pred).mean():.1%} | "
+              f"accuracy {(tp == y_true).mean():.1%} vs Keras {(keras_pred == y_true).mean():.1%}")
+    except Exception as e:   # a check, not an export step: never block the cells after it
+        print(f"{p.name}: could not be checked here ({e}). The file is still saved.")
 """)
 
 code(r"""
