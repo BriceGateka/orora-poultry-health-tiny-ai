@@ -99,24 +99,65 @@ TEAL, MIDTEAL, SAGE, ORANGE, GREY = "#1F5E5C", "#3E8E8B", "#8FB9B5", "#E97132", 
 
 code(r"""
 # ---- Where things live ---------------------------------------------------
+# DRIVE_MODE: "mount" = Drive as a folder (normal); "api" = fallback when mounting fails:
+# files are fetched from / sent to Drive through the Drive API instead; None = no Drive.
+DRIVE_MODE = None
+DRIVE_FOLDER = ["Orora AgriTech", "baseline"]
 if USE_DRIVE:
     from google.colab import drive
     try:
         drive.mount("/content/drive", force_remount=True)
+        DRIVE_MODE = "mount"
     except Exception as e:
-        raise SystemExit(
-            f"Google Drive did not mount ({e}).\n"
-            "1) Re-run this cell and click Allow on every screen of the pop-up (same Google account).\n"
-            "2) If it fails again: Runtime > Disconnect and delete runtime, then Run all.\n"
-            "3) Still failing: allow pop-ups/third-party cookies for colab.research.google.com, or try Chrome.")
-    OUT = pathlib.Path("/content/drive/MyDrive/Orora AgriTech/baseline")
-else:
-    OUT = pathlib.Path("/content/out")
+        print(f"Drive mount failed ({e}) — switching to the Drive API fallback.")
+        from google.colab import auth
+        auth.authenticate_user()          # a different sign-in pop-up: allow it
+        from googleapiclient.discovery import build
+        from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+        gdrive = build("drive", "v3")
+        DRIVE_MODE = "api"
+
+def drive_folder_id(create=False):
+    parent = "root"
+    for name in DRIVE_FOLDER:
+        q = (f"name = '{name}' and '{parent}' in parents and trashed = false "
+             "and mimeType = 'application/vnd.google-apps.folder'")
+        found = gdrive.files().list(q=q, fields="files(id)").execute()["files"]
+        if found:
+            parent = found[0]["id"]
+        elif create:
+            parent = gdrive.files().create(fields="id", body={"name": name, "parents": [parent],
+                     "mimeType": "application/vnd.google-apps.folder"}).execute()["id"]
+        else:
+            return None
+    return parent
+
+def drive_get(name, dst):
+    fid = drive_folder_id()
+    if not fid: return False
+    q = f"name = '{name}' and '{fid}' in parents and trashed = false"
+    found = gdrive.files().list(q=q, fields="files(id,size)").execute()["files"]
+    if not found: return False
+    with open(dst, "wb") as fh:
+        dl = MediaIoBaseDownload(fh, gdrive.files().get_media(fileId=found[0]["id"]), chunksize=64 << 20)
+        done = False
+        while not done:
+            _, done = dl.next_chunk()
+    return True
+
+def drive_put(src):
+    fid = drive_folder_id(create=True)
+    media = MediaFileUpload(str(src), resumable=True)
+    gdrive.files().create(body={"name": pathlib.Path(src).name, "parents": [fid]},
+                          media_body=media, fields="id").execute()
+
+OUT = pathlib.Path("/content/drive/MyDrive/Orora AgriTech/baseline") if DRIVE_MODE == "mount" \
+      else pathlib.Path("/content/out")
 OUT.mkdir(parents=True, exist_ok=True)
 RAW   = pathlib.Path("/content/raw")     # zips + unzipped originals (local disk, deleted after caching)
 CACHE = pathlib.Path("/content/cache")   # resized copies: cache/<source>/<class>/<file>.jpg
 CACHE_TAR = OUT / "cache_resized.tar"    # the Drive copy of CACHE, so re-runs skip the 8 GB download
-print("Outputs ->", OUT)
+print("Drive:", DRIVE_MODE, "| outputs ->", OUT)
 """)
 
 # --------------------------------------------------------------------------
@@ -162,7 +203,16 @@ def build_cache():
             shutil.rmtree(ex)   # free local disk
     with tarfile.open(CACHE_TAR, "w") as t:
         t.add(CACHE, arcname="cache")
+    if DRIVE_MODE == "api":
+        try:
+            drive_put(CACHE_TAR)
+        except Exception as e:
+            print("Could not upload the cache to Google Drive:", e)
     print("Cache saved to", CACHE_TAR)
+
+if DRIVE_MODE == "api" and not CACHE_TAR.exists() and not (CACHE.exists() and any(CACHE.rglob("*.jpg"))):
+    print("Fetching the image cache from Google Drive through the API ...")
+    print("  found" if drive_get(CACHE_TAR.name, CACHE_TAR) else "  not found in Drive")
 
 if CACHE.exists() and any(CACHE.rglob("*.jpg")):
     print("Cache already on local disk.")
@@ -547,6 +597,33 @@ else:
     rep_orora, _ = evaluate(make_ds(od), od, "Orora photos (Burundi)")
     metrics["orora"] = rep_orora
     json.dump(metrics, open(OUT / "metrics.json", "w"), indent=2)
+""")
+
+md(r"""
+## 12 · Package the app files
+
+This bundles everything the app and the pitch need into one small zip (a few MB): `app_model.zip`. It holds the `tfjs/` model, `labels.json`, `metrics.json` and both TFLite files. It is saved next to the other outputs and **downloaded to your computer**. Unzip it into `app/model/`.
+""")
+code(r"""
+import zipfile
+bundle = OUT / "app_model.zip"
+with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as z:
+    for p in (OUT / "tfjs").glob("*"):
+        z.write(p, p.name)                       # model.json + shards at the zip root -> app/model/
+    for name in ["labels.json", "metrics.json", "orora_droppings_v0_int8.tflite", "orora_droppings_v0_fp16.tflite"]:
+        if (OUT / name).exists():
+            z.write(OUT / name, name)
+print(bundle, f"{bundle.stat().st_size/1e6:.1f} MB")
+if DRIVE_MODE == "api":
+    try:
+        for name in ["app_model.zip", "orora_droppings_v0.keras", "split.csv"]:
+            if (OUT / name).exists():
+                drive_put(OUT / name)
+        print("Uploaded to Google Drive: Orora AgriTech/baseline/")
+    except Exception as e:   # e.g. Drive storage full: the browser download below still works
+        print("Could not upload to Google Drive:", e)
+from google.colab import files
+files.download(str(bundle))
 """)
 
 md(r"""
