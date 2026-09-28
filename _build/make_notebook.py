@@ -101,7 +101,14 @@ code(r"""
 # ---- Where things live ---------------------------------------------------
 if USE_DRIVE:
     from google.colab import drive
-    drive.mount("/content/drive")
+    try:
+        drive.mount("/content/drive", force_remount=True)
+    except Exception as e:
+        raise SystemExit(
+            f"Google Drive did not mount ({e}).\n"
+            "1) Re-run this cell and click Allow on every screen of the pop-up (same Google account).\n"
+            "2) If it fails again: Runtime > Disconnect and delete runtime, then Run all.\n"
+            "3) Still failing: allow pop-ups/third-party cookies for colab.research.google.com, or try Chrome.")
     OUT = pathlib.Path("/content/drive/MyDrive/Orora AgriTech/baseline")
 else:
     OUT = pathlib.Path("/content/out")
