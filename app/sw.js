@@ -1,6 +1,6 @@
 // Orora AgriTech: service worker. Caches everything needed to run with no network.
 // Bump VERSION whenever app files or the model change.
-const VERSION = "orora-v0.3";
+const VERSION = "orora-v0.4";
 const TFLITE = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/";
 const SHELL = [
   "./", "index.html", "styles.css", "app.js", "config.js", "i18n.js",
@@ -11,7 +11,7 @@ const SHELL = [
   TFLITE + "wasm/tflite_web_api_cc_simd.js", TFLITE + "wasm/tflite_web_api_cc_simd.wasm",
   TFLITE + "wasm/tflite_web_api_cc.js", TFLITE + "wasm/tflite_web_api_cc.wasm",
 ];
-const MODEL = ["model/orora_droppings_v0_fp16.tflite", "model/labels.json"];
+const FALLBACK_MODEL = "orora_droppings_v0_fp16.tflite";   // used only if labels.json names no file
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
@@ -19,10 +19,15 @@ self.addEventListener("install", event => {
     // cache: "reload" skips the browser's HTTP cache, so a new VERSION always gets fresh files
     const fresh = url => new Request(url, { cache: "reload" });
     await cache.addAll(SHELL.map(fresh));
-    // A missing model must not stop the app from installing.
-    for (const url of MODEL) {
-      try { await cache.add(fresh(url)); } catch (e) { /* model not added yet */ }
-    }
+    // The model file is the one labels.json names. A missing model must not stop the install.
+    try {
+      const res = await fetch(fresh("model/labels.json"));
+      if (res.ok) {
+        const meta = await res.clone().json();
+        await cache.put("model/labels.json", res);
+        await cache.add(fresh("model/" + (meta.file || FALLBACK_MODEL)));
+      }
+    } catch (e) { /* model not added yet */ }
     self.skipWaiting();
   })());
 });

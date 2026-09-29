@@ -1,4 +1,4 @@
-// Orora AgriTech — interface text and advice.
+// Orora AgriTech: interface text and advice.
 //
 // STATUS: English and French are drafts for the hackathon demo. ALL advice must be
 // reviewed and signed off by an Orora veterinarian before any producer uses it.
@@ -6,7 +6,7 @@
 // the vet, not machine-translated. Missing Kirundi keys fall back to French and the
 // app shows a banner saying so.
 
-export const LEVEL = { healthy: "ok", cocci: "warn", salmo: "warn", ncd: "urgent", unclear: "unclear" };
+export const LEVEL = { healthy: "ok", cocci: "warn", salmo: "warn", ncd: "urgent", other: "unclear", unclear: "unclear" };
 
 export const STRINGS = {
   en: {
@@ -40,8 +40,8 @@ export const STRINGS = {
     mockBanner: "TEST MODE: results are random, not from a model. Do not use for decisions.",
     langFallback: "Kirundi translation in progress: showing French.",
     smsHeader: "Orora AgriTech alert",
-    labels: { healthy: "Looks healthy", cocci: "Signs of coccidiosis", salmo: "Signs of salmonellosis", ncd: "Possible Newcastle disease", unclear: "Unclear — photo not conclusive" },
-    classNames: { healthy: "Healthy", cocci: "Coccidiosis", salmo: "Salmonellosis", ncd: "Newcastle disease" },
+    labels: { healthy: "Looks healthy", cocci: "Signs of coccidiosis", salmo: "Signs of salmonellosis", ncd: "Possible Newcastle disease", other: "Not droppings", unclear: "Unclear: photo not conclusive" },
+    classNames: { healthy: "Healthy", cocci: "Coccidiosis", salmo: "Salmonellosis", ncd: "Newcastle disease", other: "Not droppings" },
     advice: {
       healthy: [
         "Keep the routine: clean water every day, fresh feed, dry litter.",
@@ -63,12 +63,17 @@ export const STRINGS = {
       ncd: [
         "URGENT: call the Orora vet now.",
         "Do not move, sell or give away any birds, and keep visitors out.",
-        "Separate sick birds; do not eat or sell birds that die — the vet will advise on safe disposal.",
+        "Separate sick birds. Do not eat or sell birds that die; the vet will advise on safe disposal.",
         "Newcastle disease must be confirmed by a laboratory and reported. The vet will handle this.",
+      ],
+      other: [
+        "This photo does not look like droppings, so no check was made.",
+        "Photograph one pile of fresh droppings, close up, in daylight, filling most of the picture.",
+        "If birds look sick (not eating, coughing, sleepy, dying), call the vet anyway.",
       ],
       unclear: [
         "Take another photo: fresh droppings, daylight, close up.",
-        "If birds look sick — not eating, coughing, sleepy, dying — call the vet anyway.",
+        "If birds look sick (not eating, coughing, sleepy, dying), call the vet anyway.",
       ],
     },
   },
@@ -104,8 +109,8 @@ export const STRINGS = {
     mockBanner: "MODE TEST : résultats aléatoires, sans modèle. Ne pas utiliser pour décider.",
     langFallback: "Traduction en kirundi en cours : affichage en français.",
     smsHeader: "Alerte Orora AgriTech",
-    labels: { healthy: "Semble en bonne santé", cocci: "Signes de coccidiose", salmo: "Signes de salmonellose", ncd: "Maladie de Newcastle possible", unclear: "Incertain — photo non concluante" },
-    classNames: { healthy: "Sain", cocci: "Coccidiose", salmo: "Salmonellose", ncd: "Maladie de Newcastle" },
+    labels: { healthy: "Semble en bonne santé", cocci: "Signes de coccidiose", salmo: "Signes de salmonellose", ncd: "Maladie de Newcastle possible", other: "Pas des fientes", unclear: "Incertain : photo non concluante" },
+    classNames: { healthy: "Sain", cocci: "Coccidiose", salmo: "Salmonellose", ncd: "Maladie de Newcastle", other: "Pas des fientes" },
     advice: {
       healthy: [
         "Gardez la routine : eau propre chaque jour, aliment frais, litière sèche.",
@@ -127,12 +132,17 @@ export const STRINGS = {
       ncd: [
         "URGENT : appelez maintenant le vétérinaire Orora.",
         "Ne déplacez, ne vendez et ne donnez aucune volaille, et interdisez les visites.",
-        "Isolez les volailles malades ; ne consommez ni ne vendez les volailles mortes — le vétérinaire indiquera comment les éliminer.",
+        "Isolez les volailles malades. Ne consommez ni ne vendez les volailles mortes ; le vétérinaire indiquera comment les éliminer.",
         "La maladie de Newcastle doit être confirmée par un laboratoire et déclarée. Le vétérinaire s'en charge.",
+      ],
+      other: [
+        "Cette photo ne ressemble pas à des fientes : aucune analyse n'a été faite.",
+        "Photographiez un tas de fientes fraîches, de près, à la lumière du jour, remplissant l'image.",
+        "Si les volailles semblent malades (ne mangent pas, toussent, sont abattues, meurent), appelez quand même le vétérinaire.",
       ],
       unclear: [
         "Reprenez une photo : fientes fraîches, lumière du jour, de près.",
-        "Si les volailles semblent malades — ne mangent pas, toussent, sont abattues, meurent — appelez quand même le vétérinaire.",
+        "Si les volailles semblent malades (ne mangent pas, toussent, sont abattues, meurent), appelez quand même le vétérinaire.",
       ],
     },
   },

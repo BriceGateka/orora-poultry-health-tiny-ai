@@ -1,4 +1,4 @@
-// Orora AgriTech — demo configuration. Edit these before the demo.
+// Orora AgriTech: demo configuration. Edit these before the demo.
 export const CONFIG = {
   // Orora vet who receives alerts. SMS works over the mobile network with no internet.
   vetPhone: "+25700000000",            // TODO: real Orora vet number

@@ -1,4 +1,4 @@
-/* Orora AgriTech — offline demo. Brand: teal #1F5E5C, orange #E97132, grey #5A5A5A. */
+/* Orora AgriTech: offline demo. Brand: teal #1F5E5C, orange #E97132, grey #5A5A5A. */
 :root {
   --teal: #1F5E5C; --teal-mid: #3E8E8B; --sage: #8FB9B5; --orange: #E97132; --orange-ink: #B4521C;
   --grey: #5A5A5A; --ink: #1C2826; --muted: #5E6C6A; --line: #D5E2E0;
@@ -14,6 +14,7 @@
   }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; background: var(--bg); }
 body { min-height: 100dvh; display: flex; flex-direction: column; font-size: 17px; line-height: 1.45; }
 

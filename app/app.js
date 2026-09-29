@@ -1,4 +1,4 @@
-// Orora AgriTech — offline droppings check (demo).
+// Orora AgriTech: offline droppings check (demo).
 // Flow: photo -> on-device model -> result + advice -> SMS to vet -> saved batch record.
 import { CONFIG } from "./config.js";
 import { STRINGS, LEVEL, t, hasFullTranslation } from "./i18n.js";
@@ -16,7 +16,7 @@ const store = {
 const state = {
   lang: store.get("orora.lang", "en"),
   model: null,
-  meta: { classes: CONFIG.defaultClasses, size: CONFIG.defaultSize, threshold: CONFIG.defaultThreshold },
+  meta: { classes: CONFIG.defaultClasses, size: CONFIG.defaultSize, threshold: CONFIG.defaultThreshold, modelUrl: CONFIG.modelUrl },
   last: null,
 };
 
@@ -61,18 +61,21 @@ async function loadModel() {
         classes: j.classes || CONFIG.defaultClasses,
         size: (j.input && j.input.size && j.input.size[0]) || CONFIG.defaultSize,
         threshold: j.confidence_threshold ?? CONFIG.defaultThreshold,
+        // labels.json names the model file it belongs to, so a new app_model.zip needs no code change
+        modelUrl: j.file ? "model/" + j.file : CONFIG.modelUrl,
       };
     }
   } catch { /* use defaults */ }
   if (MOCK) { modelState = "ready"; setModelStatus(); return; }
   try {
     if (!window.tf) throw new Error("TensorFlow.js not loaded");
-    if (CONFIG.modelUrl.endsWith(".tflite")) {
+    const url = state.meta.modelUrl;
+    if (url.endsWith(".tflite")) {
       if (!window.tflite) throw new Error("TFLite runtime not loaded");
       tflite.setWasmPath(CONFIG.tfliteWasm);
-      state.model = await tflite.loadTFLiteModel(CONFIG.modelUrl);
+      state.model = await tflite.loadTFLiteModel(url);
     } else {
-      state.model = await tf.loadGraphModel(CONFIG.modelUrl);
+      state.model = await tf.loadGraphModel(url);
     }
     // warm-up so the first real photo is fast
     tf.tidy(() => state.model.predict(tf.zeros([1, state.meta.size, state.meta.size, 3])));
@@ -137,6 +140,7 @@ function renderResult(r) {
   advice[r.key].forEach(line => { const li = document.createElement("li"); li.textContent = line; $("#advice").append(li); });
 
   const sms = $("#sms");
+  sms.hidden = r.key === "other";                 // nothing to send the vet about
   sms.textContent = level === "urgent" ? t(L, "sendVetUrgent") : t(L, "sendVet");
   sms.classList.toggle("urgent", level === "urgent");
   const body = [

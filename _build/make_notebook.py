@@ -20,24 +20,27 @@ def code(src):
 
 # --------------------------------------------------------------------------
 md(r"""
-# Orora AgriTech — baseline droppings classifier
+# Orora AgriTech: droppings classifier (model v1)
 
-**Goal:** a small image model that sorts a photo of chicken droppings into four classes (healthy, coccidiosis, salmonellosis, Newcastle disease). It must run **offline on an entry-level phone**. This notebook trains it, measures it honestly, and exports it for the demo app.
+**Goal:** a small image model that sorts a photo into five classes: four kinds of chicken droppings (healthy, coccidiosis, salmonellosis, Newcastle disease) plus **"not droppings"**, so the app can refuse a photo of a floor, a hand or a table instead of calling it healthy. It must run **offline on an entry-level phone**. This notebook trains it, measures it honestly, and exports it for the demo app.
 
 **Run it on Google Colab with a GPU** (Runtime → Change runtime type → T4 GPU). The datasets download straight to the Colab machine, so nothing large crosses your own connection.
 
 | Step | What happens | Time (T4, approx.) |
 |---|---|---|
-| 1–3 | Download from Zenodo, resize, and cache to Google Drive | 20–40 min the first time; ~2 min after that |
-| 4–5 | Check for duplicate images; split into train / validation / test | a few min |
-| 6–7 | Train MobileNetV3-Small in two phases | 15–30 min |
-| 8 | Evaluate per class, on the test set and on the lab-confirmed (PCR) set | 1 min |
-| 9–10 | Export TFLite (int8 and float16) and TF.js; check they agree with the model | a few min |
+| 1–3 | Droppings images: download from Zenodo, resize, cache to Google Drive | 2–3 hours the first time; a few minutes after that |
+| 3b | "Not droppings" images: objects and textures from public research datasets | 5–10 min |
+| 4–5 | Duplicate check; split into train / validation / test | a few min |
+| 6–7 | Train MobileNetV3-Small in two phases | 20–30 min |
+| 8 | Evaluate per class, on the test set and on the lab-confirmed (PCR) set; check the "not droppings" guard | 1 min |
+| 9–10 | Export TFLite (float16 for the web app, int8 for phones) and check it agrees with the model | a few min |
 | 11 | Optional: test on Orora's own photos | 1 min |
+| 12 | Package `app_model.zip` and download it | 1 min |
 
-**Data.** Both datasets are CC BY 4.0, so credit the authors wherever the model is shown.
-- Machuve D., Nwankwo E., Lyimo E., Maguo E., Munisi C. — *Machine Learning Dataset for Poultry Diseases Diagnostics*, Zenodo, v2 ([10.5281/zenodo.4628934](https://doi.org/10.5281/zenodo.4628934)). 6,812 farm-labelled images; this is the training source.
-- The same authors — v3, PCR-annotated ([10.5281/zenodo.5801834](https://doi.org/10.5281/zenodo.5801834)). 1,255 images whose labels were confirmed by laboratory PCR. **Used only as a second, stricter test set, never for training.**
+**Data.** Credit the authors wherever the model is shown.
+- Machuve D., Nwankwo E., Lyimo E., Maguo E., Munisi C.: *Machine Learning Dataset for Poultry Diseases Diagnostics*, Zenodo, v2 ([10.5281/zenodo.4628934](https://doi.org/10.5281/zenodo.4628934)), CC BY 4.0. 6,812 farm-labelled images; the training source.
+- The same authors: v3, PCR-annotated ([10.5281/zenodo.5801834](https://doi.org/10.5281/zenodo.5801834)), CC BY 4.0. 1,255 images whose labels were confirmed by laboratory PCR. **Used only as a second, stricter test set, never for training.**
+- "Not droppings": Imagenette (a subset of ImageNet, fast.ai) and the Describable Textures Dataset (Cimpoi et al., Oxford). Both are for **research use**: fine for this prototype, but replace them with Orora's own photos (feed, litter, floors, birds, hands) before any commercial use. Put those in Drive under `Orora AgriTech/other_training/` and they are added automatically.
 
 **Caveat.** Newcastle disease is the rarest class (376 images in v2), so its score matters more than the overall average.
 """)
@@ -61,6 +64,7 @@ print("TensorFlow", tf.__version__, "| Keras", keras.__version__)
 
 code(r"""
 # ---- Configuration -------------------------------------------------------
+MODEL_NAME  = "orora_droppings_v1"
 SEED        = 42
 IMG_SIZE    = 224          # model input; the app must resize the same way (whole image, squashed, RGB 0-255)
 CACHE_EDGE  = 320          # longest edge of cached copies (keeps the Drive cache small)
@@ -72,8 +76,15 @@ DEDUP_HAMMING = 4          # perceptual-hash distance counted as "same photo"
 USE_DRIVE   = True         # cache resized images and save outputs to Google Drive
 SUBSET_PER_CLASS = None    # e.g. 300 for a fast dry run; None = all images
 
-CLASSES = ["healthy", "cocci", "salmo", "ncd"]   # model output order — do not change after export
-LABELS  = {"healthy": "Healthy", "cocci": "Coccidiosis", "salmo": "Salmonellosis", "ncd": "Newcastle disease"}
+# Model output order. Never reorder after export: the app reads it from labels.json.
+CLASSES = ["healthy", "cocci", "salmo", "ncd", "other"]
+LABELS  = {"healthy": "Healthy", "cocci": "Coccidiosis", "salmo": "Salmonellosis",
+           "ncd": "Newcastle disease", "other": "Not droppings"}
+DISEASE = CLASSES[:4]      # the four droppings classes
+
+# "Not droppings" images: (TFDS dataset, split, how many)
+OTHER_SOURCES = [("imagenette/160px", "train", 800),   # everyday objects and scenes
+                 ("dtd", "train", 600)]                # textures: soil, cloth, wood, stone...
 
 SOURCES = {
   # source -> {class: Zenodo download URL}
@@ -109,7 +120,7 @@ if USE_DRIVE:
         drive.mount("/content/drive", force_remount=True)
         DRIVE_MODE = "mount"
     except Exception as e:
-        print(f"Drive mount failed ({e}) — switching to the Drive API fallback.")
+        print(f"Drive mount failed ({e}). Switching to the Drive API fallback.")
         from google.colab import auth
         auth.authenticate_user()          # a different sign-in pop-up: allow it
         from googleapiclient.discovery import build
@@ -162,7 +173,7 @@ print("Drive:", DRIVE_MODE, "| outputs ->", OUT)
 
 # --------------------------------------------------------------------------
 md(r"""
-## 1–3 · Download, resize, cache
+## 1–3 · Droppings images: download, resize, cache
 
 The first run downloads about 5.8 GB (v2 classes) plus 4.4 GB (PCR set) **onto the Colab machine**. It resizes every image so its longest edge is 320 px and saves a small tar to Drive. Later runs just restore that tar.
 """)
@@ -210,11 +221,12 @@ def build_cache():
             print("Could not upload the cache to Google Drive:", e)
     print("Cache saved to", CACHE_TAR)
 
-if DRIVE_MODE == "api" and not CACHE_TAR.exists() and not (CACHE.exists() and any(CACHE.rglob("*.jpg"))):
+have_droppings = lambda: (CACHE / "v2").exists() and any((CACHE / "v2").rglob("*.jpg"))
+if DRIVE_MODE == "api" and not CACHE_TAR.exists() and not have_droppings():
     print("Fetching the image cache from Google Drive through the API ...")
     print("  found" if drive_get(CACHE_TAR.name, CACHE_TAR) else "  not found in Drive")
 
-if CACHE.exists() and any(CACHE.rglob("*.jpg")):
+if have_droppings():
     print("Cache already on local disk.")
 elif CACHE_TAR.exists():
     print("Restoring cache from Drive ...")
@@ -224,15 +236,58 @@ else:
     t0 = time.time(); build_cache(); print(f"Done in {(time.time()-t0)/60:.1f} min")
 """)
 
+md(r"""
+## 3b · "Not droppings" images
+
+Everyday objects and scenes (Imagenette) and surface textures such as soil, cloth, wood and stone (DTD). Textures matter most: they look like the ground around droppings but contain none. Any photos in Drive under `Orora AgriTech/other_training/` are added on top. These are Orora's own negatives, and they are the ones that will matter in the field.
+""")
+code(r"""
+import tensorflow_datasets as tfds
+OTHER_DIR = CACHE / "other" / "other"
+
+def save_array(arr, dst):
+    im = Image.fromarray(arr).convert("RGB")
+    im.thumbnail((CACHE_EDGE, CACHE_EDGE), Image.LANCZOS)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    im.save(dst, "JPEG", quality=92)
+
+if OTHER_DIR.exists() and any(OTHER_DIR.glob("*.jpg")):
+    print("'Not droppings' images already on local disk:", len(list(OTHER_DIR.glob("*.jpg"))))
+else:
+    for name, split, n in OTHER_SOURCES:
+        try:
+            ds = tfds.load(name, split=split, shuffle_files=True,
+                           read_config=tfds.ReadConfig(shuffle_seed=SEED))
+            k = 0
+            for ex in tfds.as_numpy(ds.take(n)):
+                save_array(ex["image"], OTHER_DIR / f"{name.split('/')[0]}_{k:04d}.jpg"); k += 1
+            print(f"  {name}: {k} images")
+        except Exception as e:   # one source failing must not stop the run
+            print(f"  {name}: skipped ({e})")
+
+    own = OUT.parent / "other_training"
+    if own.exists():
+        k = 0
+        for p in own.rglob("*"):
+            if p.suffix.lower() in IMG_EXT and resize_one(p, OTHER_DIR / f"orora_{k:04d}.jpg"):
+                k += 1
+        print(f"  Orora's own 'other' photos: {k}")
+
+n_other = len(list(OTHER_DIR.glob("*.jpg")))
+print("'Not droppings' images:", n_other)
+assert n_other >= 200, "Too few 'not droppings' images: check the messages above."
+""")
+
 code(r"""
 rows = [{"path": str(p), "source": p.parts[-3], "cls": p.parts[-2]}
         for p in CACHE.rglob("*.jpg")]
 df = pd.DataFrame(rows)
 print(df.groupby(["source", "cls"]).size().unstack(0).reindex(CLASSES))
 
-fig, axes = plt.subplots(len(CLASSES), 5, figsize=(12, 10))
+fig, axes = plt.subplots(len(CLASSES), 5, figsize=(12, 12))
 for r, c in enumerate(CLASSES):
-    sample = df[(df.source == "v2") & (df.cls == c)].sample(5, random_state=SEED)
+    src = "other" if c == "other" else "v2"
+    sample = df[(df.source == src) & (df.cls == c)].sample(5, random_state=SEED)
     for k, p in enumerate(sample.path):
         axes[r, k].imshow(Image.open(p)); axes[r, k].axis("off")
     axes[r, 0].set_title(LABELS[c], loc="left", color=TEAL, fontsize=11)
@@ -256,8 +311,9 @@ with cf.ThreadPoolExecutor(8) as pool:
     df["hash"] = list(pool.map(phash, df.path))
 df = df[df.hash.notna()].reset_index(drop=True)
 
-pcr = df[df.source == "pcr"]
-v2  = df[df.source == "v2"].copy()
+pcr   = df[df.source == "pcr"]
+v2    = df[df.source == "v2"].copy()
+other = df[df.source == "other"].drop_duplicates("hash").copy()
 
 # compare as 64-bit integers: Hamming distance = popcount(xor)
 to_int = lambda h: int(str(h), 16)
@@ -274,8 +330,8 @@ def min_hamming(x, arr, chunk=4096):
 
 v2["dist_to_pcr"] = [min_hamming(b, pcr_bits) for b in v2_bits]
 dups = v2[v2.dist_to_pcr <= DEDUP_HAMMING]
-print(f"v2 images that match a PCR image: {len(dups)} — removed from training")
-print(dups.groupby("cls").size().reindex(CLASSES, fill_value=0))
+print(f"v2 images that match a PCR image: {len(dups)} (removed from training)")
+print(dups.groupby("cls").size().reindex(DISEASE, fill_value=0))
 v2 = v2[v2.dist_to_pcr > DEDUP_HAMMING].reset_index(drop=True)
 
 # also drop exact duplicates inside v2 so they cannot straddle train and test
@@ -283,7 +339,7 @@ before = len(v2); v2 = v2.drop_duplicates("hash").reset_index(drop=True)
 print(f"exact duplicates inside v2 removed: {before - len(v2)}")
 
 # Near-duplicates inside v2 (the same pile photographed twice) are GROUPED, not removed:
-# a group always lands entirely in train, or val, or test — so the test set is honest.
+# a group always lands entirely in train, or val, or test, so the test set is honest.
 bits = np.array([to_int(h) for h in v2.hash], dtype=np.uint64)
 popcount = getattr(np, "bitwise_count", None) or (
     lambda a: np.unpackbits(a.view(np.uint8).reshape(-1, 8), axis=1).sum(1))
@@ -300,6 +356,10 @@ for i in range(len(bits)):
 v2["group"] = [find(i) for i in range(len(bits))]
 sizes = v2.group.value_counts()
 print(f"near-duplicate groups: {int((sizes > 1).sum())} groups covering {int(sizes[sizes > 1].sum())} images")
+
+# "Not droppings" images join the pool, each in its own group
+other["group"] = -1 - np.arange(len(other))
+pool_df = pd.concat([v2, other], ignore_index=True)
 """)
 
 # --------------------------------------------------------------------------
@@ -308,7 +368,7 @@ code(r"""
 from sklearn.model_selection import StratifiedGroupKFold
 
 if SUBSET_PER_CLASS:
-    v2 = v2.groupby("cls", group_keys=False).apply(
+    pool_df = pool_df.groupby("cls", group_keys=False).apply(
         lambda g: g.sample(min(len(g), SUBSET_PER_CLASS), random_state=SEED))
 
 def group_split(d, n_splits):
@@ -317,19 +377,19 @@ def group_split(d, n_splits):
     keep, out = next(sgkf.split(d, d.cls, groups=d.group))
     return d.iloc[keep], d.iloc[out]
 
-rest, test_df = group_split(v2, 7)        # ≈15% test
+rest, test_df = group_split(pool_df, 7)   # ≈15% test
 train_df, val_df = group_split(rest, 6)   # ≈15% of the total for validation
 assert not set(train_df.group) & set(test_df.group), "near-duplicate leak between train and test"
 pcr_df = pcr.copy()
 
 for name, d in [("train", train_df), ("val", val_df), ("test", test_df), ("pcr", pcr_df)]:
-    print(f"{name:5s}", d.cls.value_counts().reindex(CLASSES).to_dict())
+    print(f"{name:5s}", d.cls.value_counts().reindex(CLASSES, fill_value=0).to_dict())
 
 cls_idx = {c: i for i, c in enumerate(CLASSES)}
 weights = compute_class_weight("balanced", classes=np.arange(len(CLASSES)),
                                y=train_df.cls.map(cls_idx).values)
 CLASS_WEIGHT = dict(enumerate(weights))
-print("class weights:", {CLASSES[k]: round(v, 2) for k, v in CLASS_WEIGHT.items()})
+print("class weights:", {CLASSES[k]: round(float(v), 2) for k, v in CLASS_WEIGHT.items()})
 
 pd.concat([train_df.assign(split="train"), val_df.assign(split="val"),
            test_df.assign(split="test")])[["path", "cls", "split"]].to_csv(OUT / "split.csv", index=False)
@@ -369,7 +429,7 @@ test_ds, pcr_ds  = make_ds(test_df), make_ds(pcr_df)
 md(r"""
 ## 6–7 · Model and training
 
-The backbone is **MobileNetV3-Small**, pre-trained on ImageNet, which makes a model of about 1–2 MB after int8 quantisation. It includes its own input rescaling, so it takes raw 0–255 RGB. Training runs in two phases:
+The backbone is **MobileNetV3-Small**, pre-trained on ImageNet, which makes a model of about 1–2 MB. It includes its own input rescaling, so it takes raw 0–255 RGB. Training runs in two phases:
 1. Train only a new classification head, with the backbone frozen.
 2. Unfreeze the top backbone layers and fine-tune them at a low learning rate.
 
@@ -385,7 +445,7 @@ inputs  = keras.Input((IMG_SIZE, IMG_SIZE, 3), name="image")
 x       = base(inputs, training=False)
 x       = keras.layers.Dropout(0.3)(x)
 outputs = keras.layers.Dense(len(CLASSES), activation="softmax", name="probs")(x)
-model   = keras.Model(inputs, outputs, name="orora_droppings_v0")
+model   = keras.Model(inputs, outputs, name=MODEL_NAME)
 
 def fit(epochs, lr, tag):
     model.compile(optimizer=keras.optimizers.Adam(lr),
@@ -406,7 +466,7 @@ for layer in base.layers:                      # keep BatchNorm statistics froze
         layer.trainable = False
 
 h2 = fit(EPOCHS_FT, 1e-5, "ft")
-model.save(OUT / "orora_droppings_v0.keras")
+model.save(OUT / f"{MODEL_NAME}.keras")
 
 hist = {k: h1.history[k] + h2.history[k] for k in ["accuracy", "val_accuracy", "loss", "val_loss"]}
 fig, ax = plt.subplots(1, 2, figsize=(11, 3.5))
@@ -419,57 +479,73 @@ plt.show()
 
 # --------------------------------------------------------------------------
 md(r"""
-## 8 · Evaluation — per class, on two test sets
+## 8 · Evaluation: per class, on two test sets
 
-- **v2 test**: held-out images, never trained on, labelled the same way as the training data.
-- **PCR set**: images whose labels were confirmed by a laboratory, with any image overlapping the training data removed. This is the stricter test.
+- **Held-out test**: images never trained on, labelled the same way as the training data. Includes "not droppings" images.
+- **PCR set**: droppings whose labels a laboratory confirmed, with any image overlapping the training data removed. This is the stricter test. It has no "not droppings" images.
 
 **Recall** answers: *of the sick birds with this disease, how many did we catch?* That is the number to put on the pitch slide.
 """)
 code(r"""
+IDX = list(range(len(CLASSES)))
+NAMES = [LABELS[c] for c in CLASSES]
+
 def evaluate(ds, d, name):
     probs = model.predict(ds, verbose=0)
     y_true, y_pred = d.cls.map(cls_idx).values, probs.argmax(1)
-    rep = classification_report(y_true, y_pred, target_names=[LABELS[c] for c in CLASSES],
+    rep = classification_report(y_true, y_pred, labels=IDX, target_names=NAMES,
                                 digits=3, output_dict=True, zero_division=0)
     print(f"\n=== {name}  (n = {len(d)}) ===")
-    print(classification_report(y_true, y_pred, target_names=[LABELS[c] for c in CLASSES],
-                                digits=3, zero_division=0))
-    cm = confusion_matrix(y_true, y_pred, labels=range(len(CLASSES)))
-    fig, ax = plt.subplots(figsize=(5.2, 4.4))
+    print(classification_report(y_true, y_pred, labels=IDX, target_names=NAMES, digits=3, zero_division=0))
+    cm = confusion_matrix(y_true, y_pred, labels=IDX)
+    fig, ax = plt.subplots(figsize=(6, 5))
     ax.imshow(cm, cmap=plt.matplotlib.colors.LinearSegmentedColormap.from_list("t", ["#FFFFFF", TEAL]))
-    for i in range(len(CLASSES)):
-        for j in range(len(CLASSES)):
+    for i in IDX:
+        for j in IDX:
             ax.text(j, i, cm[i, j], ha="center", va="center",
                     color="white" if cm[i, j] > cm.max() / 2 else "black")
-    ticks = [LABELS[c] for c in CLASSES]
-    ax.set_xticks(range(len(CLASSES)), ticks, rotation=30, ha="right"); ax.set_yticks(range(len(CLASSES)), ticks)
+    ax.set_xticks(IDX, NAMES, rotation=30, ha="right"); ax.set_yticks(IDX, NAMES)
     ax.set_xlabel("predicted"); ax.set_ylabel("true"); ax.set_title(name, color=TEAL, loc="left")
     plt.tight_layout(); plt.show()
     return rep, probs
 
-rep_test, _ = evaluate(test_ds, test_df, "v2 held-out test")
-rep_pcr,  _ = evaluate(pcr_ds,  pcr_df,  "PCR-confirmed set")
+rep_test, p_test = evaluate(test_ds, test_df, "Held-out test")
+rep_pcr,  _      = evaluate(pcr_ds,  pcr_df,  "PCR-confirmed set")
 
-metrics = {"model": "orora_droppings_v0", "backbone": "MobileNetV3Small", "img_size": IMG_SIZE,
-           "train_n": len(train_df), "val_n": len(val_df),
-           "v2_test": rep_test, "pcr": rep_pcr,
+# The guard: what happens to photos that are not droppings, and to droppings photos
+y_test = test_df.cls.map(cls_idx).values
+pred = p_test.argmax(1)
+is_other, other_i = (y_test == cls_idx["other"]), cls_idx["other"]
+guard = {
+    "not_droppings_refused": float((pred[is_other] == other_i).mean()),
+    "not_droppings_called_healthy": float((pred[is_other] == cls_idx["healthy"]).mean()),
+    "droppings_wrongly_refused": float((pred[~is_other] == other_i).mean()),
+}
+print(f"Not-droppings photos refused: {guard['not_droppings_refused']:.1%} "
+      f"| called 'healthy': {guard['not_droppings_called_healthy']:.1%} "
+      f"| real droppings wrongly refused: {guard['droppings_wrongly_refused']:.1%}")
+
+metrics = {"model": MODEL_NAME, "backbone": "MobileNetV3Small", "img_size": IMG_SIZE, "classes": CLASSES,
+           "train_n": len(train_df), "val_n": len(val_df), "test_n": len(test_df),
+           "test": rep_test, "pcr": rep_pcr, "guard": guard,
            "dedup_removed_from_train": int(len(dups)),
            "data": ["Machuve et al., Zenodo 10.5281/zenodo.4628934 (CC BY 4.0)",
-                    "Machuve et al., Zenodo 10.5281/zenodo.5801834 (CC BY 4.0)"]}
+                    "Machuve et al., Zenodo 10.5281/zenodo.5801834 (CC BY 4.0)",
+                    "Imagenette (fast.ai) and DTD (Cimpoi et al.): research use, 'not droppings' class"]}
 json.dump(metrics, open(OUT / "metrics.json", "w"), indent=2)
 
 slide = pd.DataFrame({
-    "Condition": [LABELS[c] for c in CLASSES],
-    "Recall, v2 test": [f"{rep_test[LABELS[c]]['recall']:.0%}" for c in CLASSES],
-    "Recall, PCR set": [f"{rep_pcr[LABELS[c]]['recall']:.0%}" for c in CLASSES]})
-print("\nFor the Results slide:"); print(slide.to_string(index=False))
+    "Condition": NAMES + ["Overall accuracy"],
+    "Held-out test": [f"{rep_test[n]['recall']:.0%}" for n in NAMES] + [f"{rep_test['accuracy']:.0%}"],
+    "PCR set": [f"{rep_pcr[n]['recall']:.0%}" if rep_pcr[n]["support"] else "n/a" for n in NAMES]
+               + [f"{rep_pcr['accuracy']:.0%}"]})
+print("\nFor the Results slide (share of cases caught):"); print(slide.to_string(index=False))
 """)
 
 md(r"""
 ### Confidence threshold for the app
 
-The app should say *"unclear — retake the photo or call the vet"* rather than guess. The table below shows, for each confidence threshold on the validation set, how many photos the app would answer and how accurate those answers are. Pick a threshold and put it in `labels.json`.
+The app should say *"unclear, retake the photo or call the vet"* rather than guess. The table below shows, for each confidence threshold on the validation set, how many photos the app would answer and how accurate those answers are. Pick a threshold and put it in `labels.json`.
 """)
 code(r"""
 vp = model.predict(val_ds, verbose=0); vy = val_df.cls.map(cls_idx).values
@@ -484,13 +560,12 @@ CONF_THRESHOLD = 0.7   # <- adjust after reading the table
 
 # --------------------------------------------------------------------------
 md(r"""
-## 9–10 · Export for the phone and the web app
+## 9–10 · Export for the web app and phones
 
-- **`orora_droppings_v0_int8.tflite`**: fully int8-quantised. It is the smallest and fastest, suited to Android and microcontrollers.
-- **`orora_droppings_v0_fp16.tflite`**: a float16 fallback, if int8 loses too much accuracy.
-- **`tfjs/`**: for the offline web demo (PWA).
+- **`orora_droppings_v1_fp16.tflite`**: the file the web app runs in the browser (TFLite WebAssembly runtime).
+- **`orora_droppings_v1_int8.tflite`**: fully int8-quantised, the smallest; for a native Android app or a microcontroller.
 
-Each exported TFLite model is checked against the Keras model on the test set: how often do they agree, and how accurate is each?
+Each exported model is checked against the Keras model on the test set: how often do they agree, and how accurate is each?
 """)
 code(r"""
 SAVED = OUT / "saved_model"
@@ -507,13 +582,13 @@ conv.representative_dataset = rep_data
 conv.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
 conv.inference_input_type = tf.uint8
 conv.inference_output_type = tf.uint8
-int8_path = OUT / "orora_droppings_v0_int8.tflite"
+int8_path = OUT / f"{MODEL_NAME}_int8.tflite"
 int8_path.write_bytes(conv.convert())
 
 conv = tf.lite.TFLiteConverter.from_saved_model(str(SAVED))
 conv.optimizations = [tf.lite.Optimize.DEFAULT]
 conv.target_spec.supported_types = [tf.float16]
-fp16_path = OUT / "orora_droppings_v0_fp16.tflite"
+fp16_path = OUT / f"{MODEL_NAME}_fp16.tflite"
 fp16_path.write_bytes(conv.convert())
 
 for p in [int8_path, fp16_path]:
@@ -552,11 +627,13 @@ for p in [fp16_path, int8_path]:
 """)
 
 code(r"""
-# Labels + preprocessing contract for the app — the app must follow this exactly.
+# Labels + preprocessing contract for the app. The app must follow this exactly.
 json.dump({
-    "model": "orora_droppings_v0",
+    "model": MODEL_NAME,
+    "file": fp16_path.name,
     "classes": CLASSES,
     "labels_en": [LABELS[c] for c in CLASSES],
+    "reject_class": "other",
     "input": {"size": [IMG_SIZE, IMG_SIZE], "channels": "RGB", "range": "0-255",
               "resize": "whole image, squashed to size (no crop)"},
     "confidence_threshold": CONF_THRESHOLD,
@@ -565,20 +642,11 @@ json.dump({
 print(open(OUT / "labels.json").read())
 """)
 
-code(r"""
-# TF.js export for the offline web demo.
-# If the install causes version conflicts, run this cell in a fresh runtime (only needs OUT/saved_model).
-!pip -q install tensorflowjs
-!tensorflowjs_converter --input_format=tf_saved_model --output_format=tfjs_graph_model \
-    --quantize_uint8 "{SAVED}" "{OUT}/tfjs"
-!ls -la "{OUT}/tfjs"
-""")
-
 # --------------------------------------------------------------------------
 md(r"""
-## 11 · Optional — test on Orora's own photos
+## 11 · Optional: test on Orora's own photos
 
-Put vet-labelled photos in Drive under `Orora AgriTech/orora_photos/<class>/`. The class folders must be named `healthy`, `cocci`, `salmo` and `ncd`. A score lower than on the Tanzanian test set is expected: the Burundian photos differ in lighting, feed, breeds and phones. That gap is the argument for field validation. Report it as it is.
+Put vet-labelled photos in Drive under `Orora AgriTech/orora_photos/<class>/`, with folders named `healthy`, `cocci`, `salmo`, `ncd` (and `other` for non-droppings photos). A score lower than on the Tanzanian test set is expected: the Burundian photos differ in lighting, feed, breeds and phones. That gap is the argument for field validation. Report it as it is.
 """)
 code(r"""
 ORORA = OUT.parent / "orora_photos"
@@ -602,21 +670,19 @@ else:
 md(r"""
 ## 12 · Package the app files
 
-This bundles everything the app and the pitch need into one small zip (a few MB): `app_model.zip`. It holds the `tfjs/` model, `labels.json`, `metrics.json` and both TFLite files. It is saved next to the other outputs and **downloaded to your computer**. Unzip it into `app/model/`.
+This bundles what the app and the pitch need into one small zip: `app_model.zip`, with `labels.json`, `metrics.json` and both TFLite files. It is saved next to the other outputs and **downloaded to your computer**. Unzip it into `app/model/`.
 """)
 code(r"""
 import zipfile
 bundle = OUT / "app_model.zip"
 with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as z:
-    for p in (OUT / "tfjs").glob("*"):
-        z.write(p, p.name)                       # model.json + shards at the zip root -> app/model/
-    for name in ["labels.json", "metrics.json", "orora_droppings_v0_int8.tflite", "orora_droppings_v0_fp16.tflite"]:
-        if (OUT / name).exists():
-            z.write(OUT / name, name)
+    for p in [OUT / "labels.json", OUT / "metrics.json", fp16_path, int8_path]:
+        if p.exists():
+            z.write(p, p.name)
 print(bundle, f"{bundle.stat().st_size/1e6:.1f} MB")
 if DRIVE_MODE == "api":
     try:
-        for name in ["app_model.zip", "orora_droppings_v0.keras", "split.csv"]:
+        for name in ["app_model.zip", f"{MODEL_NAME}.keras", "split.csv"]:
             if (OUT / name).exists():
                 drive_put(OUT / name)
         print("Uploaded to Google Drive: Orora AgriTech/baseline/")
@@ -631,13 +697,13 @@ md(r"""
 
 | File | Use |
 |---|---|
-| `orora_droppings_v0_int8.tflite` | Android app / microcontroller |
-| `orora_droppings_v0_fp16.tflite` | fallback if int8 loses accuracy |
-| `tfjs/` | offline web demo |
+| `app_model.zip` | everything the app needs: unzip into `app/model/` |
+| `orora_droppings_v1_fp16.tflite` | the model the web app runs |
+| `orora_droppings_v1_int8.tflite` | smallest version, for a native Android app or a microcontroller |
 | `labels.json` | class order, preprocessing rules, confidence threshold |
-| `metrics.json` | per-class results for the README and the Results slide |
+| `metrics.json` | per-class results and the "not droppings" guard, for the README and the Results slide |
 | `split.csv` | exact train/val/test split, for reproducibility |
-| `orora_droppings_v0.keras`, `saved_model/` | source model for retraining |
+| `orora_droppings_v1.keras`, `saved_model/` | source model for retraining |
 
 **Before the pitch:** put the per-class recall from step 8 into the Results slide, and quote only numbers this notebook produced.
 """)

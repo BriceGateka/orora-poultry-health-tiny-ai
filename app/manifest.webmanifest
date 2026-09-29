@@ -1,5 +1,5 @@
 {
-  "name": "Orora AgriTech — poultry health check",
+  "name": "Orora AgriTech: poultry health check",
   "short_name": "Orora Check",
   "description": "Offline poultry health check from a droppings photo.",
   "start_url": "./index.html",
