@@ -1,0 +1,90 @@
+{
+  "model": "orora_droppings_v0",
+  "backbone": "MobileNetV3Small",
+  "img_size": 224,
+  "train_n": 4638,
+  "val_n": 928,
+  "v2_test": {
+    "Healthy": {
+      "precision": 0.9593220338983051,
+      "recall": 0.9658703071672355,
+      "f1-score": 0.9625850340136054,
+      "support": 293.0
+    },
+    "Coccidiosis": {
+      "precision": 0.9963898916967509,
+      "recall": 0.9822064056939501,
+      "f1-score": 0.989247311827957,
+      "support": 281.0
+    },
+    "Salmonellosis": {
+      "precision": 0.9864864864864865,
+      "recall": 0.9733333333333334,
+      "f1-score": 0.9798657718120806,
+      "support": 300.0
+    },
+    "Newcastle disease": {
+      "precision": 0.85,
+      "recall": 0.9444444444444444,
+      "f1-score": 0.8947368421052632,
+      "support": 54.0
+    },
+    "accuracy": 0.9719827586206896,
+    "macro avg": {
+      "precision": 0.9480496030203857,
+      "recall": 0.966463622659741,
+      "f1-score": 0.9566087399397266,
+      "support": 928.0
+    },
+    "weighted avg": {
+      "precision": 0.9729664455225607,
+      "recall": 0.9719827586206896,
+      "f1-score": 0.9722968002230071,
+      "support": 928.0
+    }
+  },
+  "pcr": {
+    "Healthy": {
+      "precision": 0.66796875,
+      "recall": 0.49279538904899134,
+      "f1-score": 0.5671641791044776,
+      "support": 347.0
+    },
+    "Coccidiosis": {
+      "precision": 0.9253112033195021,
+      "recall": 0.5978552278820375,
+      "f1-score": 0.7263843648208469,
+      "support": 373.0
+    },
+    "Salmonellosis": {
+      "precision": 0.6212121212121212,
+      "recall": 0.9398280802292264,
+      "f1-score": 0.7480045610034207,
+      "support": 349.0
+    },
+    "Newcastle disease": {
+      "precision": 0.7521739130434782,
+      "recall": 0.9301075268817204,
+      "f1-score": 0.8317307692307693,
+      "support": 186.0
+    },
+    "accuracy": 0.7131474103585658,
+    "macro avg": {
+      "precision": 0.7416664968937754,
+      "recall": 0.740146556010494,
+      "f1-score": 0.7183209685398786,
+      "support": 1255.0
+    },
+    "weighted avg": {
+      "precision": 0.7439311659101924,
+      "recall": 0.7131474103585658,
+      "f1-score": 0.7039863371271287,
+      "support": 1255.0
+    }
+  },
+  "dedup_removed_from_train": 0,
+  "data": [
+    "Machuve et al., Zenodo 10.5281/zenodo.4628934 (CC BY 4.0)",
+    "Machuve et al., Zenodo 10.5281/zenodo.5801834 (CC BY 4.0)"
+  ]
+}

@@ -67,7 +67,13 @@ async function loadModel() {
   if (MOCK) { modelState = "ready"; setModelStatus(); return; }
   try {
     if (!window.tf) throw new Error("TensorFlow.js not loaded");
-    state.model = await tf.loadGraphModel(CONFIG.modelUrl);
+    if (CONFIG.modelUrl.endsWith(".tflite")) {
+      if (!window.tflite) throw new Error("TFLite runtime not loaded");
+      tflite.setWasmPath(CONFIG.tfliteWasm);
+      state.model = await tflite.loadTFLiteModel(CONFIG.modelUrl);
+    } else {
+      state.model = await tf.loadGraphModel(CONFIG.modelUrl);
+    }
     // warm-up so the first real photo is fast
     tf.tidy(() => state.model.predict(tf.zeros([1, state.meta.size, state.meta.size, 3])));
     modelState = "ready";
@@ -156,10 +162,9 @@ $("#photo").addEventListener("change", async e => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   if (!MOCK && modelState !== "ready") { alert(t(state.lang, "modelMissing")); return; }
-  const url = URL.createObjectURL(file);
   const img = $("#preview");
-  img.src = url;
-  await img.decode().catch(() => {});
+  // wait on the load event: img.decode() can stay pending while the image is not displayed
+  await new Promise(resolve => { img.onload = img.onerror = resolve; img.src = URL.createObjectURL(file); });
   $("#result-title").textContent = t(state.lang, "analysing");
   show("result");
   try {

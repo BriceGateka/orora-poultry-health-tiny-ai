@@ -1,0 +1,26 @@
+{
+  "model": "orora_droppings_v0",
+  "classes": [
+    "healthy",
+    "cocci",
+    "salmo",
+    "ncd"
+  ],
+  "labels_en": [
+    "Healthy",
+    "Coccidiosis",
+    "Salmonellosis",
+    "Newcastle disease"
+  ],
+  "input": {
+    "size": [
+      224,
+      224
+    ],
+    "channels": "RGB",
+    "range": "0-255",
+    "resize": "whole image, squashed to size (no crop)"
+  },
+  "confidence_threshold": 0.7,
+  "note": "Decision support, not diagnosis. Suspected Newcastle disease requires laboratory confirmation and official reporting."
+}

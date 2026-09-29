@@ -1,26 +1,28 @@
-// Orora AgriTech — service worker: cache everything needed to run with no network.
+// Orora AgriTech: service worker. Caches everything needed to run with no network.
 // Bump VERSION whenever app files or the model change.
-const VERSION = "orora-v0.1";
+const VERSION = "orora-v0.3";
+const TFLITE = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/";
 const SHELL = [
   "./", "index.html", "styles.css", "app.js", "config.js", "i18n.js",
   "manifest.webmanifest", "icon.svg",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js",
+  TFLITE + "dist/tf-tflite.min.js",
+  // the TFLite runtime picks the SIMD build where the phone supports it, else the plain one
+  TFLITE + "wasm/tflite_web_api_cc_simd.js", TFLITE + "wasm/tflite_web_api_cc_simd.wasm",
+  TFLITE + "wasm/tflite_web_api_cc.js", TFLITE + "wasm/tflite_web_api_cc.wasm",
 ];
+const MODEL = ["model/orora_droppings_v0_fp16.tflite", "model/labels.json"];
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(VERSION);
-    await cache.addAll(SHELL);
-    // Model: model.json plus every weight shard it lists. Missing model = app still installs.
-    try {
-      const res = await fetch("model/model.json", { cache: "no-cache" });
-      if (res.ok) {
-        const json = await res.clone().json();
-        await cache.put("model/model.json", res);
-        const shards = (json.weightsManifest || []).flatMap(g => g.paths).map(p => "model/" + p);
-        await cache.addAll([...shards, "model/labels.json"].filter(Boolean));
-      }
-    } catch (e) { /* no model yet */ }
+    // cache: "reload" skips the browser's HTTP cache, so a new VERSION always gets fresh files
+    const fresh = url => new Request(url, { cache: "reload" });
+    await cache.addAll(SHELL.map(fresh));
+    // A missing model must not stop the app from installing.
+    for (const url of MODEL) {
+      try { await cache.add(fresh(url)); } catch (e) { /* model not added yet */ }
+    }
     self.skipWaiting();
   })());
 });
