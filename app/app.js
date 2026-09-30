@@ -139,10 +139,6 @@ function renderResult(r) {
   $("#advice").innerHTML = "";
   advice[r.key].forEach(line => { const li = document.createElement("li"); li.textContent = line; $("#advice").append(li); });
 
-  const sms = $("#sms");
-  sms.hidden = r.key === "other";                 // nothing to send the vet about
-  sms.textContent = level === "urgent" ? t(L, "sendVetUrgent") : t(L, "sendVet");
-  sms.classList.toggle("urgent", level === "urgent");
   const body = [
     t(L, "smsHeader"),
     r.batch ? `Batch: ${r.batch}` : null,
@@ -150,8 +146,36 @@ function renderResult(r) {
     new Date(r.at).toLocaleString(),
     MOCK ? "TEST MODE - not a real result" : null,
   ].filter(Boolean).join(" | ");
+  state.message = body;
+
+  const noVet = r.key === "other";                // nothing to send the vet about
+  const wa = $("#wa"), sms = $("#sms"), share = $("#share");
+  wa.hidden = sms.hidden = noVet;
+  share.hidden = noVet || !canSharePhoto();
+  wa.textContent = level === "urgent" ? t(L, "sendVetUrgent") : t(L, "sendVet");
+  wa.classList.toggle("urgent", level === "urgent");
+  // whatsapp:// opens the installed app directly, with no network needed to get there
+  wa.href = `whatsapp://send?phone=${CONFIG.vetWhatsApp}&text=${encodeURIComponent(body)}`;
   sms.href = `sms:${CONFIG.vetPhone}?body=${encodeURIComponent(body)}`;
 }
+
+// If WhatsApp is not installed the whatsapp:// link does nothing: fall back to the web link when online.
+$("#wa").addEventListener("click", () => {
+  setTimeout(() => {
+    if (document.visibilityState === "visible" && navigator.onLine)
+      location.href = `https://wa.me/${CONFIG.vetWhatsApp}?text=${encodeURIComponent(state.message || "")}`;
+  }, 1500);
+});
+
+// Share the photo itself (the vet needs to see it): the phone's share menu, then WhatsApp and the vet.
+const canSharePhoto = () => {
+  try { return !!(state.lastFile && navigator.canShare && navigator.canShare({ files: [state.lastFile] })); }
+  catch { return false; }
+};
+$("#share").addEventListener("click", async () => {
+  try { await navigator.share({ files: [state.lastFile], text: state.message }); }
+  catch (e) { if (e.name !== "AbortError") console.warn("share", e); }
+});
 
 function show(view) {
   ["capture", "result", "records"].forEach(v => { $(`#view-${v}`).hidden = v !== view; });
@@ -166,6 +190,7 @@ $("#photo").addEventListener("change", async e => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   if (!MOCK && modelState !== "ready") { alert(t(state.lang, "modelMissing")); return; }
+  state.lastFile = file;
   const img = $("#preview");
   // wait on the load event: img.decode() can stay pending while the image is not displayed
   await new Promise(resolve => { img.onload = img.onerror = resolve; img.src = URL.createObjectURL(file); });

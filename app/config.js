@@ -1,7 +1,10 @@
 // Orora AgriTech: demo configuration. Edit these before the demo.
 export const CONFIG = {
-  // Orora vet who receives alerts. SMS works over the mobile network with no internet.
-  vetPhone: "+25700000000",            // TODO: real Orora vet number
+  // Orora vet who receives alerts.
+  // WhatsApp (main button) needs data; the message waits in WhatsApp until the phone is online.
+  // SMS (backup button) goes over the mobile network and works with no internet.
+  vetWhatsApp: "25700000000",          // TODO: real number, international format, digits only (no + or spaces)
+  vetPhone: "+25700000000",            // TODO: same number for SMS, with +
   vetName: "Orora vet",
 
   // Model exported by notebooks/01_baseline_droppings_classifier.ipynb: unzip app_model.zip into app/model/.
