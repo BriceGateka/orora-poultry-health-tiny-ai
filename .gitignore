@@ -22,3 +22,4 @@ orora_photos/
 # Screenshots and notes at the top level
 /*.png
 /*.jpg
+.vercel
