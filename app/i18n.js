@@ -161,84 +161,84 @@ export const STRINGS = {
     "sendVetUrgent": "Kumenyesha umuganga w'ibiturwa ubunyene kuri Whatsapp",
     "sharePhoto": "Rungikira ishusho ku muganga w'ibitungwa",
     "sendSms": "Rungika ubutumwa (Ntibisaba Interineti)",
-    "disclaimer": "bisaba ubufasha kungingo,ata gipimo. vyemezwa n'umuganga w'ibitungwa.",
+    "disclaimer": "Bisaba ubufasha kungingo,ata gipimo. vyemezwa n'umuganga w'ibitungwa.",
     "smsNote": "Message isanzwe igenda ubunyene. Whatsapp isaba ko uba uri kumurongo, utari kumurongo ubutumwa buza kugenda usubiye kumurongo.",
     "smsHeader": "Ubutumwa bwa Orora AgriTech",
     "labels": {
       "healthy": "Ntagorane ihari",
-      "cocci": "ibimenyetso vya kocidiyoze",
-      "salmo": "ibimenyetso vya Saromonera",
+      "cocci": "Ibimenyetso vya kocidiyoze",
+      "salmo": "Ibimenyetso vya Saromonera",
       "ncd": "Ibimenetso vy'ingwara y'agahweka",
       "other": "Nta masyenkoko aboneka",
-      "unclear": "amakenga: ishusho ntiyoba iyifatiro"
+      "unclear": "Amakenga: ishusho ntiyoba iyifatiro"
     },
     "classNames": {
-      "healthy": "nziza",
-      "cocci": "kocidiyoze",
-      "salmo": "saromonera",
-      "ncd": "indwara y'agahweka",
+      "healthy": "Nziza",
+      "cocci": "Kocidiyoze",
+      "salmo": "Saromonera",
+      "ncd": "Indwara y'agahweka",
       "other": "Nta masyenkoko aboneka"
     },
     "advice": {
       "healthy": [
         "Cunga isuku:amazi meza buri umunsi, indya nziza, ibisasizo vy'umutse",
-        "kurikiza ikiranga minsi c'incanco",
-        "suzuma gushasha mu minsi 2 canke 3, canke imbere yaho, kwa ata nkoko irya nabi canke igoyagoya"
+        "Kurikiza ikiranga minsi c'incanco",
+        "Suzuma gushasha mu minsi 2 canke 3, canke imbere yaho, kwa ata nkoko irya nabi canke igoyagoya"
       ],
       "cocci": [
-        "shira kuruhande inkoko zigoyagoya canke zita amasyenkoko arimwo amaraso",
+        "Shira kuruhande inkoko zigoyagoya canke zita amasyenkoko arimwo amaraso",
         "Gumiza ibisasizo vyumutse:kura ibisasizo vyatose kandi homa ivyozinyeramwo vyatobotse",
-        "rondera uyumunsi umuganga w'inkoko kugira ayivure. Ntuhindure urugero kwogutangako umuti.",
-        "hanagura ivyo ziriramwo nivyo zinyweramwo kumusi kumusi"
+        "Rondera uyumunsi umuganga w'inkoko kugira ayivure. Ntuhindure urugero kwogutangako umuti.",
+        "Hanagura ivyo ziriramwo nivyo zinyweramwo kumusi kumusi"
       ],
       "salmo": [
-        "kura muzindi inkoko zirwaye",
-        "karaba iminwe igihe wakoze ku nkoko canke amase: uwomugera ushobora kujanwa n'umuntu.",
-        "ntucuruze canke ufungure amagi canke inyama yinkoko irwaye ataruhusha rwa muganga",
-        "hamagara uyu munsi umuganga w'inkoko. antibiyotike itangwa gusa ubibwiwe n'umuganga"
+        "Kura inkoko zirwaye muzindi",
+        "Karaba iminwe igihe wakoze ku nkoko canke amase: uwomugera ushobora kujanwa n'umuntu.",
+        "Ntucuruze canke ufungure amagi canke inyama yinkoko irwaye ataruhusha rwa muganga.",
+        "Hamagara uyu munsi umuganga w'inkoko. Antibiyotike itangwa gusa ubibwiwe n'umuganga."
       ],
       "ncd": [
         "ICIHUTIRWA: Hamagara ubu nyene umuganga w'inkoko",
-        "ntiwimure, ntudandaze canke ntujane ahandi inkoko n'imwe, kandi ntusubire kwakira ingenzi.",
+        "Ntiwimure, ntudandaze canke ntujane ahandi inkoko n'imwe, kandi ntusubire kwakira ingenzi.",
         "Shira k'uruhande inkoko irwaye. Ntufungure canke ucuruze inkoko zapfuye; umuganga w'ibitungwa azobabwira iyo muzishira",
         "Indwara y'agahweka itegerezwa kwemezwa ninzu y'ubushakashatsi, ikanabitangaza. Ni igikorwa c'umuganga w'ibitungwa."
       ],
       "other": [
-        "iyi sanamu ntisa nk'amase y'inkoko: ntawundi mwihwezo wabaye.",
+        "Iyi sanamu ntisa nk'amase y'inkoko: ntawundi mwihwezo wabaye.",
         "Fata isanamu yumurwi w'amase mabisi, egera, kumuco wumutaga, uzuza isanamu.",
-        "iyo inkoko zimeze nkizirwaye (ntizirya, zirakorora, zirisinzirirako, zirapfa), hamagara nimiburiburi umuganga w'ibitungwa."
+        "Iyo inkoko zimeze nkizirwaye (ntizirya, zirakorora, zirisinzirirako, zirapfa), hamagara nimiburiburi umuganga w'ibitungwa."
       ],
       "unclear": [
-        "subiramwo isanamu: amase mabisi, umuco w'umurango, egera.",
-        "iyo inkoko zimeze nkizirwaye (ntizirya, zikorora, zirisinzirirako, zirapfa), hamagara nimiburiburi umuganga w'ibitungwa."
+        "Subiramwo gufata isanamu: amase mabisi, umuco w'umurango, egera.",
+        "Iyo inkoko zimeze nkizirwaye (ntizirya, zikorora, zirisinzirirako, zirapfa), hamagara nimiburiburi umuganga w'ibitungwa."
       ]
     },
     "title": "Suzuma inkoko zawe.",
-    "lead": "fata isanamu y'amase mabisi. kora ubushakashatsi kuri teretefone udakoresheje interinete",
-    "batchLabel": "numero yurunganwe canke inkoko zavukiye rimwe (kuwubishatse)",
-    "takePhoto": "fata isanamu",
-    "tip1": "koresha amaze amasaha make",
-    "tip2": "umuco mwiza wo kumurango, ata farashe, amase yuzure isanamu.",
-    "tip3": "isanamu y'ikirundo. iyo inkoko imeze nk'iyirwaye, hamagara n'imiburiburi umuganga w'ibitungwa.",
-    "result": "inyishu",
-    "whatToDo": "hakorwe iki ubu nyene",
-    "another": "iga kuyindi shusho",
-    "records": "andika ivyuyo murwi",
-    "recordsNote": "icowaravye neza cose kiguma muri terefone yawe. ntagisohoka utacemereye.",
-    "exportCsv": "imura ivyo wakoze",
-    "noRecords": "ntamwihwezo urakorwa",
-    "tabCheck": "umwihwezo",
+    "lead": "Fata isanamu y'amase amaze amasaha make. Kora isuzumwa kuri teretefone udakoresheje interinete.",
+    "batchLabel": "Numero y'inzu y'inkoko canke umugwi w'inkoko zavukiye rimwe (kuwubishatse)",
+    "takePhoto": "Fata Isanamu",
+    "tip1": "Koresha amasyenkoko amaze amasaha make.",
+    "tip2": "Umuco mwiza wo kumurango, ata farashe, amase yuzure isanamu.",
+    "tip3": "Isanamu imwe kukirundo c'amasyenkoko. Iyo inkoko imeze nk'iyirwaye, nahonyene hamagara umuganga w'ibitungwa.",
+    "result": "Inyishu",
+    "whatToDo": "Hakorwe iki ubu nyene",
+    "another": "Iga kuyindi shusho",
+    "records": "Andika ivyuyo murwi",
+    "recordsNote": "Icowaravye neza cose kiguma muri terefone yawe. ntagisohoka utacemeje.",
+    "exportCsv": "Imura ivyo wakoze",
+    "noRecords": "Ntamwihwezo urakorwa",
+    "tabCheck": "Umwihwezo",
     "tabRecords": "Imura ivyo wanditse",
     "online": "Uri kumurongo",
     "offline": "Nturi kumurongo",
-    "modelReady": "Urashobora gukora ubushakashatsi utari kumurongo",
+    "modelReady": "Urashobora gukora isuzuma utari kumurongo",
     "analysing": "Umwihwezo",
-    "confidence": "umwizero",
-    "credits": "Ubushakashatsi bwakozwe na Machuve et al.(CC BY4.0)",
+    "confidence": "Umwizero",
+    "credits": "Twisunze ubushakashatsi bwakozwe na Machuve et al.(CC BY4.0)",
     "modelLoading": "Rindira",
-    "modelMissing": "Hari ibikibura:ongerako amafishe yasohowe muri app/mode/.",
-    "mockBanner": "GERAGEZA:Ninyishu mfatakibanza, atafatiro zifise. Ntuyikoreshe mugufata ingingo.",
-    "langFallback": "ihindurwa mu kirundi birabandanya: twerekana igifaransa"
+    "modelMissing": "Hari ibikibura: ongerako amafishe yasohowe muri app/mode/.",
+    "mockBanner": "GERAGEZA:Ni inyishu mfatakibanza, atafatiro ifise. Ntuyikoreshe mugufata ingingo.",
+    "langFallback": "Ihindurwa mu kirundi birabandanya."
   }/*RN-END*/,
 };
 
