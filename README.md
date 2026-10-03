@@ -29,14 +29,14 @@ During the morning round (feeding, water, cleaning) the farmer sees the dropping
 
 ## What the AI does, and why a simpler tool would not do the job
 
-**Computer vision.** A small image model (MobileNetV3-Small, 1.9 MB) recognises patterns in droppings linked to **coccidiosis, salmonellosis and Newcastle disease**, or a healthy flock. Model v1 adds a **"not droppings"** class, so photos of anything else are refused instead of classified.
+**Computer vision.** A small image model (MobileNetV3-Small, 1.9 MB) recognises patterns in droppings linked to **coccidiosis, salmonellosis and Newcastle disease**, or a healthy flock.
 
 An SMS hotline, a spreadsheet or a symptom checklist would need the farmer to describe in words exactly the early changes untrained eyes miss. **Reading the image is the one step that needs AI.** Everything after it is deliberately simple: a **fixed list of answers** written and checked by vets, so nothing is generated and nothing can be invented.
 
 ## Guardrails and responsible AI
 
 - **Human in the loop:** the tool informs, a vet decides. Suspected Newcastle disease goes to laboratory confirmation and official reporting (a WOAH-listed disease).
-- **"Not sure, ask a person":** below 70% confidence the app says *"unclear: retake the photo or call the vet"* instead of guessing. Model v1 also refuses photos that are not droppings.
+- **"Not sure, ask a person":** below 70% confidence the app says *"unclear: retake the photo or call the vet"* instead of guessing.
 - **No hallucinations:** no generative text. Every sentence the app can show is in [`app/i18n.js`](app/i18n.js) and can be checked.
 - **Privacy:** photos and records **stay on the phone** (browser storage). Nothing is uploaded. A case leaves the phone only when the farmer taps WhatsApp, SMS or share. On a shared or lost phone, the records are visible to whoever opens the app on that phone; they hold the batch number, the result and the time, with no name and no photo.
 - **Consent:** photos of producers' farms are taken with their consent.
@@ -56,7 +56,6 @@ An SMS hotline, a spreadsheet or a symptom checklist would need the farmer to de
 |---|---|---|---|
 | Machine Learning Dataset for Poultry Diseases Diagnostics, v2 (Machuve et al.) | training, validation, held-out test | Zenodo [10.5281/zenodo.4628934](https://doi.org/10.5281/zenodo.4628934), CC BY 4.0 | 6,812 droppings photos: healthy 2,057 · coccidiosis 2,103 · salmonella 2,276 · Newcastle 376 |
 | Same, v3, PCR-annotated | **test only, never trained on** | Zenodo [10.5281/zenodo.5801834](https://doi.org/10.5281/zenodo.5801834), CC BY 4.0 | 1,255 photos confirmed by laboratory PCR (Newcastle 186) |
-| Imagenette (fast.ai) and Describable Textures Dataset (Cimpoi et al.) | "not droppings" class (model v1) | research use | about 1,400 images |
 
 Duplicates are removed (318 exact duplicates within v2; no v2 photo matches a PCR photo), and near-identical photos are kept on one side of the train/test split.
 
@@ -78,7 +77,7 @@ We report the lab-confirmed column first: it is the honest one. For Newcastle di
 - **Four conditions only.** Gumboro, fowl typhoid, fowl pox, worms, avian influenza and other diseases are not covered; such cases fall into the nearest class or "unclear", which is why a vet always confirms.
 - **Droppings only.** Respiratory signs, behaviour and mortality are not seen. A healthy-looking dropping does not prove a healthy flock.
 - **Small and noisy labels.** v2 labels are farm-assigned; only 1,255 photos (186 Newcastle) are lab-confirmed.
-- **"Not droppings" images** come from general research datasets, not Burundian farm scenes, until Orora's own photos replace them.
+- **It cannot yet tell droppings from other things.** The deployed model (v0) gives a result for any photo. The confidence threshold flags many unclear photos and a vet confirms every case, but a "not droppings" class is the next step: it is already built into the training notebook (with Imagenette and the Describable Textures Dataset as research-use negatives, to be replaced by Orora's own farm photos), and not yet deployed.
 
 ## Tech stack
 
