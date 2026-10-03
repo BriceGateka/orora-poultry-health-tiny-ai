@@ -44,7 +44,7 @@ An SMS hotline, a spreadsheet or a symptom checklist would need the farmer to de
 
 ## Local language
 
-**Kirundi** (code `rn`; shown as **KI** in the app), plus French and English. The full interface and all advice were translated by a native speaker; the advice is to be checked by an Orora vet. **Kirundi voice clips** recorded by a person play offline next to the advice, for farmers who prefer to listen.
+**Kirundi** (code `rn`; shown as **KI** in the app), plus French and English. The full interface and all advice were translated by a native speaker; the advice is to be checked by an Orora vet. The app also plays **Kirundi voice clips** offline next to the advice, for farmers who prefer to listen; the clips are recorded by a person (recordings in progress).
 
 **How it would fare in a less-supported language:** Kirundi is itself low-resource, and the design does not depend on language AI. The answers are a fixed list of about 66 sentences; adding a language means one translation sheet and seven voice recordings, loaded with [`_build/import_kirundi.py`](_build/import_kirundi.py). There is no speech recognition or machine translation to trust with farm advice.
 
