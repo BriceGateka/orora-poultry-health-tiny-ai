@@ -14,7 +14,8 @@ const store = {
 };
 
 const state = {
-  lang: store.get("orora.lang", "en"),
+  // ?lang=rn|fr|en opens the app in that language (e.g. a link shared with Kirundi speakers)
+  lang: ["en", "fr", "rn"].includes(params.get("lang")) ? params.get("lang") : store.get("orora.lang", "en"),
   model: null,
   meta: { classes: CONFIG.defaultClasses, size: CONFIG.defaultSize, threshold: CONFIG.defaultThreshold, modelUrl: CONFIG.modelUrl },
   last: null,
