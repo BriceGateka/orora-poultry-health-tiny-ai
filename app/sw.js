@@ -1,6 +1,6 @@
 // Orora AgriTech: service worker. Caches everything needed to run with no network.
 // Bump VERSION whenever app files or the model change.
-const VERSION = "orora-v0.9";
+const VERSION = "orora-v0.10";
 const TFLITE = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/";
 const SHELL = [
   "./", "index.html", "styles.css", "app.js", "config.js", "i18n.js",
