@@ -28,3 +28,6 @@ orora_photos/
 *.pkpass
 *.ics
 HackNation - Launch Presentation/
+
+# Submission package (videos, internal documents): OneDrive only
+Submission/
