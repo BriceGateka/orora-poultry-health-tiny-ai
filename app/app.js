@@ -32,6 +32,7 @@ function applyLang() {
   updateNet();
   setModelStatus();
   if (state.last) renderResult(state.last);
+  setListen($("#listen-howto"), "howto");
   renderRecords();
 }
 $("#lang").addEventListener("change", e => { state.lang = e.target.value; store.set("orora.lang", state.lang); applyLang(); });
@@ -148,6 +149,8 @@ function renderResult(r) {
   ].filter(Boolean).join(" | ");
   state.message = body;
 
+  setListen($("#listen"), r.key);
+
   const noVet = r.key === "other";                // nothing to send the vet about
   const wa = $("#wa"), sms = $("#sms"), share = $("#share");
   wa.hidden = sms.hidden = noVet;
@@ -158,6 +161,41 @@ function renderResult(r) {
   wa.href = `whatsapp://send?phone=${CONFIG.vetWhatsApp}&text=${encodeURIComponent(body)}`;
   sms.href = `sms:${CONFIG.vetPhone}?body=${encodeURIComponent(body)}`;
 }
+
+// ------------------------------------------------------------------ Kirundi voice clips
+// Recorded advice, one clip per result (+ "howto" for the photo tips), listed in audio/clips.json:
+// { "rn": { "healthy": "rn/healthy.m4a", ..., "howto": "rn/howto.m4a" } }. Cached for offline use.
+// Clips are always offered when they exist, whatever the screen language: listening needs no reading.
+let CLIPS = {};
+const player = new Audio();
+let playingBtn = null;
+fetch("audio/clips.json").then(r => (r.ok ? r.json() : {})).then(j => {
+  CLIPS = (j && j.rn) || {};
+  setListen($("#listen-howto"), "howto");
+  if (state.last) setListen($("#listen"), state.last.key);
+}).catch(() => {});
+
+function setListen(btn, key) {
+  stopClip();
+  btn.hidden = !CLIPS[key];
+  btn.dataset.clip = CLIPS[key] ? "audio/" + CLIPS[key] : "";
+  btn.textContent = "▶  " + t(state.lang, "listen");
+}
+function stopClip() {
+  player.pause();
+  if (playingBtn) playingBtn.textContent = "▶  " + t(state.lang, "listen");
+  playingBtn = null;
+}
+for (const btn of [$("#listen"), $("#listen-howto")]) {
+  btn.addEventListener("click", async () => {
+    if (playingBtn === btn) return stopClip();
+    stopClip();
+    player.src = btn.dataset.clip;
+    try { await player.play(); playingBtn = btn; btn.textContent = "■  " + t(state.lang, "stopListen"); }
+    catch (e) { console.warn("audio", e); }
+  });
+}
+player.addEventListener("ended", stopClip);
 
 // If WhatsApp is not installed the whatsapp:// link does nothing: fall back to the web link when online.
 $("#wa").addEventListener("click", () => {

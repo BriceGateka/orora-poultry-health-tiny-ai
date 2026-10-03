@@ -1,0 +1,4 @@
+{
+  "_help": "Kirundi voice clips. Put recordings in audio/rn/ and list them here, e.g. \"healthy\": \"rn/healthy.m4a\". Keys: howto, healthy, cocci, salmo, ncd, other, unclear. Formats: .m4a, .mp3 or .ogg/.opus.",
+  "rn": {}
+}

@@ -1,6 +1,6 @@
 // Orora AgriTech: service worker. Caches everything needed to run with no network.
 // Bump VERSION whenever app files or the model change.
-const VERSION = "orora-v0.6";
+const VERSION = "orora-v0.7";
 const TFLITE = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/";
 const SHELL = [
   "./", "index.html", "styles.css", "app.js", "config.js", "i18n.js",
@@ -28,6 +28,15 @@ self.addEventListener("install", event => {
         await cache.add(fresh("model/" + (meta.file || FALLBACK_MODEL)));
       }
     } catch (e) { /* model not added yet */ }
+    // Kirundi voice clips listed in audio/clips.json
+    try {
+      const res = await fetch(fresh("audio/clips.json"));
+      if (res.ok) {
+        const clips = (await res.clone().json()).rn || {};
+        await cache.put("audio/clips.json", res);
+        for (const f of Object.values(clips)) { try { await cache.add(fresh("audio/" + f)); } catch (e) { /* skip a missing clip */ } }
+      }
+    } catch (e) { /* no clips yet */ }
     self.skipWaiting();
   })());
 });
