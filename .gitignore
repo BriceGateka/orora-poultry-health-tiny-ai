@@ -23,3 +23,8 @@ orora_photos/
 /*.png
 /*.jpg
 .vercel
+
+# Personal event files, never in the public repo
+*.pkpass
+*.ics
+HackNation - Launch Presentation/
