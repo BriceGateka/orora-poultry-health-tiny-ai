@@ -156,7 +156,90 @@ export const STRINGS = {
   },
 
   // Kirundi: to be written by a native speaker with the Orora vet. Empty keys fall back to French.
-  rn: {},
+  rn: /*RN-START*/{
+    "sendVet": "Rungikira umuganga w'ibitungwa wa Orora kuri Whatsapp",
+    "sendVetUrgent": "Kumenyesha umuganga w'ibiturwa ubunyene kuri Whatsapp",
+    "sharePhoto": "Rungikira ishusho ku muganga w'ibitungwa",
+    "sendSms": "Rungika ubutumwa (Ntibisaba Interineti)",
+    "disclaimer": "bisaba ubufasha kungingo,ata gipimo.vyemezwa n'umuganga w'ibitungwa.",
+    "smsNote": "Message isanzwe igenda ubunyene. Whatsapp isaba ko uba uri kumurongo, utari kumurongo ubutumwa buza kugenda usubiye kumurongo.",
+    "smsHeader": "Ubutumwa bwa Orora AgriTech",
+    "labels": {
+      "healthy": "Ntagorane ihari",
+      "cocci": "ibimenyetso vya kogucidiyoze",
+      "salmo": "ibimenyetso vya Saromonera",
+      "ncd": "Ibimenetso vy'ingwara y'agahweka",
+      "other": "Nta masyenkoko aboneka",
+      "unclear": "amakenga:ishusho ntiyoba iyifatiro"
+    },
+    "classNames": {
+      "healthy": "nziza",
+      "cocci": "kogucidiyose",
+      "salmo": "saromonera",
+      "ncd": "indwara ya gahweka",
+      "other": "Nta masyenkoko aboneka"
+    },
+    "advice": {
+      "healthy": [
+        "Cunga isuku:amazi meza buri umunsi,indya nziza,ibisasizo vy'umutse",
+        "kurikiza ikiranga minsi c'incanco",
+        "suzuma gushasha mu minsi 2 -3,canke imbere yaho kwa ata nkoko irya nabi canke igoyagoya"
+      ],
+      "cocci": [
+        "shira kuruhande inkoko zigoyagoya canke zita amasyenkoko arimwo amaraso",
+        "Gumiza ibisasizo vyumutse:kura ibisasizo vyatose kandi homa ivyozinyeramwo vyatobotse",
+        "rondera uyumunsi umuganga wa orora vet kugira ayi vure. Ntuhindure urugero kwogutangako umuti.",
+        "hanagura ivyo ziriramwo nivyo zinyweramwo k'umunsi k'uunsi"
+      ],
+      "salmo": [
+        "kura muzindi inkoko irwaye",
+        "karaba iminwe igihe wakoze ku nkoko canke amase:uwomugera ushobora kujanwa n'umuntu",
+        "ntucuruze canke ufungure amagi canke inyama yinkoko irwaye ataruhusha rw'amuganga",
+        "hamagara uyu munsi umuganga wa orora vet.antibiyotike itangwa gusa ubibwiwe n'umuganga"
+      ],
+      "ncd": [
+        "ICIHUTIRWA:Hamagara ubu nyene umuganga wa orora vet",
+        "ntiwimure,ntudandaze canke ntujane ahandi inkoko n'imwe, kandi ntusubire kwakira ingenzi.",
+        "Shira k'uruhande inkoko irwaye.Ntufungure canke mucuruze inkoko zapfuye;umuganga w'ibitungwa azobabwira iyo muzishira",
+        "Indwara ya gahweka itegerezwa kwemezwa ninzu y'ubushakashatsi, ikanabitangaza.Ngikorwa c'umuganga w'ibitungwa."
+      ],
+      "other": [
+        "iyi sanamu ntisa nk'amase y'inkoko:ntabushakashatsi bwabaye.",
+        "Fata isanamu yumurwi w'amase mabisi,egera,kumuco wumutaga,uzuza isanamu.",
+        "iyo inkoko zimeze nkizirwaye(ntizirya,zirakorora,zisinzirirako,zipfa),hamagara nimiburiburi  umuganga w'ibiturwa"
+      ],
+      "unclear": [
+        "subiramwo isanamu:amase mabisi,umuco w'umurango,egera.",
+        "iyo inkoko zimeze nkizirwaye(ntizirya,zikorora,zisinzirirako,zipfa),hamagara nimiburiburi umuganga w'ibiturwa."
+      ]
+    },
+    "title": "Suzuma inkoko zawe.",
+    "lead": "fata isanamu y'amase mabisi.kora ubushakashatsi kuri teretefone udakoresheje interinete",
+    "batchLabel": "numero yurunganwe canke inkoko zavukiye rimwe (kuwubishatse)",
+    "takePhoto": "fata isanamu",
+    "tip1": "koresha amase amasaha make",
+    "tip2": "umuco mwiza wo kumurango,ata farashe,amase yuzure isanamu.",
+    "tip3": "isanamu y'ikirundo. iyo inkoko imeze nk'iyirwaye,hamagara n'imiburiburi umuganga w'ibitungwa",
+    "result": "inyishu",
+    "whatToDo": "hakorwe iki ubu nyene",
+    "another": "iga kuyindi shusho",
+    "records": "andika ivyuyo murwi",
+    "recordsNote": "icowaravye neza cose kiguma muri terefone yawe. ntagisohoka utacemereye.",
+    "exportCsv": "imura ivyo wakoze",
+    "noRecords": "ntamwihwezo urakorwa",
+    "tabCheck": "umwihwezo",
+    "tabRecords": "Imura ivyo wanditse",
+    "online": "Uri kumurongo",
+    "offline": "Nturi kumurongo",
+    "modelReady": "Urashobora gukora ubushakashatsi utari kumurongo",
+    "analysing": "Umwihwezo",
+    "confidence": "umwizero",
+    "credits": "Ubushakashatsi bwakozwe na Machuve et al.(CC BY4.0)",
+    "modelLoading": "Rindira",
+    "modelMissing": "Hari ibikibura:ongerako amafishe yasohowe muri app/mode/.",
+    "mockBanner": "GERAGEZA:Ninyishu mfatakibanza, atafatiro zifise.ntuyikoreshe mugufata ingingo.",
+    "langFallback": "ihindurwa mu kirundi birabandanya: twerekana igifaransa"
+  }/*RN-END*/,
 };
 
 // Look up a key for a language, falling back to French for Kirundi, then English.
