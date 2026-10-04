@@ -110,4 +110,11 @@ It meets farmers where they are: offline, on their own phone, in Kirundi. Its an
 ## Credits and rights
 
 Droppings datasets: Machuve D., Nwankwo E., Lyimo E., Maguo E., Munisi C. (CC BY 4.0). Sound dataset for phase 2: Aworinde et al., Mendeley Data, [10.17632/zp4nf2dxbh.1](https://doi.org/10.17632/zp4nf2dxbh.1) (CC BY 4.0).
-© 2026 Orora Agro Group. All rights reserved. Third-party components remain under their own licences.
+## Licence
+
+The code in this repository is released under the **MIT License** (see [LICENSE](LICENSE)), © 2026 Orora Agro Group, as required by the Hack-Nation Global AI Hackathon terms.
+
+- **Datasets** remain under their own licences (CC BY 4.0 for the droppings and sound datasets, with credit to their authors; research use for Imagenette and DTD). They are downloaded by the notebook, not redistributed here.
+- **Third-party libraries** (TensorFlow, TensorFlow.js, the TFLite WebAssembly runtime) remain under their own licences.
+- The **Orora Agro Group name and logo** are not covered by the licence.
+- The advice text is decision support only and does not replace a veterinarian; see the guardrails above.
