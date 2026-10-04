@@ -29,14 +29,14 @@ During the morning round (feeding, water, cleaning) the farmer sees the dropping
 
 ## What the AI does, and why a simpler tool would not do the job
 
-**Computer vision.** A small image model (MobileNetV3-Small, 1.9 MB) recognises patterns in droppings linked to **coccidiosis, salmonellosis and Newcastle disease**, or a healthy flock.
+**Computer vision.** A small image model (MobileNetV3-Small, 1.9 MB) recognises patterns in droppings linked to **coccidiosis, salmonellosis and Newcastle disease**, or a healthy flock. A fifth class, **"not droppings"**, refuses photos of anything else instead of diagnosing them.
 
 An SMS hotline, a spreadsheet or a symptom checklist would need the farmer to describe in words exactly the early changes untrained eyes miss. **Reading the image is the one step that needs AI.** Everything after it is deliberately simple: a **fixed list of answers** written and checked by vets, so nothing is generated and nothing can be invented.
 
 ## Guardrails and responsible AI
 
 - **Human in the loop:** the tool informs, a vet decides. Suspected Newcastle disease goes to laboratory confirmation and official reporting (a WOAH-listed disease).
-- **"Not sure, ask a person":** below 70% confidence the app says *"unclear: retake the photo or call the vet"* instead of guessing.
+- **"Not sure, ask a person":** below 70% confidence the app says *"unclear: retake the photo or call the vet"* instead of guessing. A photo that is not droppings gets *"Not droppings"* and no diagnosis (99.5% of non-droppings test photos refused, none called healthy).
 - **No hallucinations:** no generative text. Every sentence the app can show is in [`app/i18n.js`](app/i18n.js) and can be checked.
 - **Privacy:** photos and records **stay on the phone** (browser storage). Nothing is uploaded. A case leaves the phone only when the farmer taps WhatsApp, SMS or share. On a shared or lost phone, the records are visible to whoever opens the app on that phone; they hold the batch number, the result and the time, with no name and no photo.
 - **Consent:** photos of producers' farms are taken with their consent.
@@ -56,20 +56,22 @@ An SMS hotline, a spreadsheet or a symptom checklist would need the farmer to de
 |---|---|---|---|
 | Machine Learning Dataset for Poultry Diseases Diagnostics, v2 (Machuve et al.) | training, validation, held-out test | Zenodo [10.5281/zenodo.4628934](https://doi.org/10.5281/zenodo.4628934), CC BY 4.0 | 6,812 droppings photos: healthy 2,057 · coccidiosis 2,103 · salmonella 2,276 · Newcastle 376 |
 | Same, v3, PCR-annotated | **test only, never trained on** | Zenodo [10.5281/zenodo.5801834](https://doi.org/10.5281/zenodo.5801834), CC BY 4.0 | 1,255 photos confirmed by laboratory PCR (Newcastle 186) |
+| Imagenette (fast.ai) and Describable Textures Dataset (Cimpoi et al., Oxford) | "not droppings" class | research use | about 1,400 images (objects, and textures such as soil, cloth, wood) |
 
 Duplicates are removed (318 exact duplicates within v2; no v2 photo matches a PCR photo), and near-identical photos are kept on one side of the train/test split.
 
-### Results (model v0)
+### Results (deployed model v1)
 
-| Share of cases caught (recall) | Held-out test (928) | Lab-confirmed PCR set (1,255) |
-|---|---|---|
-| Healthy | 97% | 49% |
-| Coccidiosis | 98% | 60% |
-| Salmonellosis | 97% | 94% |
-| **Newcastle disease** | 94% | **93%** |
-| Overall accuracy | 97% | 71% |
+| Share of cases caught (recall) | Held-out test (1,128) | Lab-confirmed PCR set (1,255) | PCR set, earlier model v0 |
+|---|---|---|---|
+| Healthy | 96% | 41% | 49% |
+| Coccidiosis | 98% | 48% | 60% |
+| Salmonellosis | 93% | 90% | 94% |
+| **Newcastle disease** | 94% | **93.5%** | 93% |
+| Not droppings (refused) | 99.5% | (none in this set) | (no such class) |
+| Overall accuracy | 96% | 65% | 71% |
 
-We report the lab-confirmed column first: it is the honest one. For Newcastle disease, a false alarm that brings a vet is the safe mistake. The healthy versus coccidiosis confusion is what field validation must fix.
+We report the lab-confirmed column first: it is the honest one. Adding the "not droppings" guard cost 6 points on the lab-confirmed set (some lab photos are now refused, which sends the farmer to retake the photo or call the vet) and kept Newcastle detection at 93.5%. We chose the guard: a confident diagnosis of a photo that is not droppings is the more dangerous error. For Newcastle disease, a false alarm that brings a vet is the safe mistake. The healthy versus coccidiosis confusion is what field validation must fix. Only 0.6% of real droppings in the held-out test were wrongly refused.
 
 ### What the data does not cover
 
@@ -77,7 +79,7 @@ We report the lab-confirmed column first: it is the honest one. For Newcastle di
 - **Four conditions only.** Gumboro, fowl typhoid, fowl pox, worms, avian influenza and other diseases are not covered; such cases fall into the nearest class or "unclear", which is why a vet always confirms.
 - **Droppings only.** Respiratory signs, behaviour and mortality are not seen. A healthy-looking dropping does not prove a healthy flock.
 - **Small and noisy labels.** v2 labels are farm-assigned; only 1,255 photos (186 Newcastle) are lab-confirmed.
-- **It cannot yet tell droppings from other things.** The deployed model (v0) gives a result for any photo. The confidence threshold flags many unclear photos and a vet confirms every case, but a "not droppings" class is the next step. We trained it (model v1, with Imagenette and the Describable Textures Dataset as research-use negatives): it refused **99.5%** of non-droppings test photos and called none of them healthy, but accuracy on the lab-confirmed set fell from **71% to 65%**, with Newcastle detection unchanged (93.5%). We kept v0 for this submission and will retrain the guard on Orora's own farm photos before deploying it.
+- **The "not droppings" guard** is trained on general research images (objects, textures), not Burundian farm scenes. Farm objects it has not seen (feeders, feed, litter, birds) could still get a droppings result; Orora's own farm photos will replace these images.
 
 ## Tech stack
 
