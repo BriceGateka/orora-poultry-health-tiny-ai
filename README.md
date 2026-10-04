@@ -1,6 +1,6 @@
-# Orora Check: Small AI for poultry health
+# Inkoko AI: Small AI for poultry health
 
-**An offline early warning for poultry disease, for smallholder farmers in Burundi.** A phone photo of fresh droppings is read **on the device**, with no internet. The farmer gets plain advice in **Kirundi**, French or English, and alerts a vet by WhatsApp or SMS.
+**An offline early warning for poultry disease, for smallholder farmers in Burundi.** *Inkoko* means chicken in Kirundi. A phone photo of fresh droppings is read **on the device**, with no internet. The farmer gets plain advice in **Kirundi**, French or English, and alerts a vet by WhatsApp or SMS.
 
 - **Live app:** https://agritech.ororaagro.com (Kirundi: https://agritech.ororaagro.com/?lang=rn)
 - **Challenge:** Hack-Nation 7th Global AI Hackathon, Challenge 4, *Small AI for Development* (The World Bank), sector **agriculture**
@@ -12,7 +12,7 @@
 
 ## Problem statement
 
-Because of Orora Check, **a smallholder poultry farmer in rural Burundi** will **get a first read on a suspected disease and alert a vet the same day** she notices a change in her birds' droppings, which she would otherwise do **late, once birds start dying**. We know because Newcastle disease can infect virtually a whole flock within two to six days and kill up to 100% of it [1], while only 8.6% of Burundians use the internet [2].
+Because of Inkoko AI, **a smallholder poultry farmer in rural Burundi** will **get a first read on a suspected disease and alert a vet the same day** she notices a change in her birds' droppings, which she would otherwise do **late, once birds start dying**. We know because Newcastle disease can infect virtually a whole flock within two to six days and kill up to 100% of it [1], while only 8.6% of Burundians use the internet [2].
 
 | Context, Burundi | Figure | Source |
 |---|---|---|

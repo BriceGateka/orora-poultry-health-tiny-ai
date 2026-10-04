@@ -1,6 +1,6 @@
 {
-  "name": "Orora AgriTech: poultry health check",
-  "short_name": "Orora Check",
+  "name": "Inkoko AI by Orora: poultry health check",
+  "short_name": "Inkoko AI",
   "description": "Offline poultry health check from a droppings photo.",
   "start_url": "./index.html",
   "scope": "./",
