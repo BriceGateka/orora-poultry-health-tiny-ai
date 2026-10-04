@@ -43,7 +43,7 @@ export const STRINGS = {
     confidence: "Confidence",
     mockBanner: "TEST MODE: results are random, not from a model. Do not use for decisions.",
     langFallback: "Kirundi translation in progress: showing French.",
-    smsHeader: "Inkoko AI alert (Orora)",
+    smsHeader: "Inkoko AI alert (Orora AgriTech)",
     labels: { healthy: "Looks healthy", cocci: "Signs of coccidiosis", salmo: "Signs of salmonellosis", ncd: "Possible Newcastle disease", other: "Not droppings", unclear: "Unclear: photo not conclusive" },
     classNames: { healthy: "Healthy", cocci: "Coccidiosis", salmo: "Salmonellosis", ncd: "Newcastle disease", other: "Not droppings" },
     advice: {
@@ -116,7 +116,7 @@ export const STRINGS = {
     confidence: "Confiance",
     mockBanner: "MODE TEST : résultats aléatoires, sans modèle. Ne pas utiliser pour décider.",
     langFallback: "Traduction en kirundi en cours : affichage en français.",
-    smsHeader: "Alerte Inkoko AI (Orora)",
+    smsHeader: "Alerte Inkoko AI (Orora AgriTech)",
     labels: { healthy: "Semble en bonne santé", cocci: "Signes de coccidiose", salmo: "Signes de salmonellose", ncd: "Maladie de Newcastle possible", other: "Pas des fientes", unclear: "Incertain : photo non concluante" },
     classNames: { healthy: "Sain", cocci: "Coccidiose", salmo: "Salmonellose", ncd: "Maladie de Newcastle", other: "Pas des fientes" },
     advice: {
