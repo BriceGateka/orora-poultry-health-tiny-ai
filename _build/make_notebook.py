@@ -83,8 +83,10 @@ LABELS  = {"healthy": "Healthy", "cocci": "Coccidiosis", "salmo": "Salmonellosis
 DISEASE = CLASSES[:4]      # the four droppings classes
 
 # "Not droppings" images: (TFDS dataset, split, how many)
-OTHER_SOURCES = [("imagenette/160px", "train", 800),   # everyday objects and scenes
-                 ("dtd", "train", 600)]                # textures: soil, cloth, wood, stone...
+OTHER_SOURCES = [  # (name, direct download, how many)
+    ("imagenette", "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-160.tgz", 800),       # everyday objects, ~95 MB
+    ("dtd", "https://www.robots.ox.ac.uk/~vgg/data/dtd/download/dtd-r1.0.1.tar.gz", 600),        # textures: soil, cloth, wood, ~600 MB
+]
 
 SOURCES = {
   # source -> {class: Zenodo download URL}
@@ -242,36 +244,39 @@ md(r"""
 Everyday objects and scenes (Imagenette) and surface textures such as soil, cloth, wood and stone (DTD). Textures matter most: they look like the ground around droppings but contain none. Any photos in Drive under `Orora AgriTech/other_training/` are added on top. These are Orora's own negatives, and they are the ones that will matter in the field.
 """)
 code(r"""
-import tensorflow_datasets as tfds
+# Direct downloads (tensorflow_datasets is broken on current Colab: protobuf version clash)
 OTHER_DIR = CACHE / "other" / "other"
 
-def save_array(arr, dst):
-    im = Image.fromarray(arr).convert("RGB")
-    im.thumbnail((CACHE_EDGE, CACHE_EDGE), Image.LANCZOS)
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    im.save(dst, "JPEG", quality=92)
+def take_images(root, n, prefix):
+    files = sorted(p for p in pathlib.Path(root).rglob("*") if p.suffix.lower() in IMG_EXT)
+    random.Random(SEED).shuffle(files)
+    k = 0
+    for p in files:
+        if k >= n:
+            break
+        if resize_one(p, OTHER_DIR / f"{prefix}_{k:04d}.jpg"):
+            k += 1
+    return k
 
 if OTHER_DIR.exists() and any(OTHER_DIR.glob("*.jpg")):
     print("'Not droppings' images already on local disk:", len(list(OTHER_DIR.glob("*.jpg"))))
 else:
-    for name, split, n in OTHER_SOURCES:
+    RAW.mkdir(exist_ok=True)
+    for name, url, n in OTHER_SOURCES:
         try:
-            ds = tfds.load(name, split=split, shuffle_files=True,
-                           read_config=tfds.ReadConfig(shuffle_seed=SEED))
-            k = 0
-            for ex in tfds.as_numpy(ds.take(n)):
-                save_array(ex["image"], OTHER_DIR / f"{name.split('/')[0]}_{k:04d}.jpg"); k += 1
-            print(f"  {name}: {k} images")
+            tgz = RAW / f"{name}.tgz"
+            subprocess.run(["wget", "-q", "-c", "-O", str(tgz), url], check=True)
+            dst = RAW / name
+            dst.mkdir(exist_ok=True)
+            subprocess.run(["tar", "-xzf", str(tgz), "-C", str(dst)], check=True)
+            print(f"  {name}: {take_images(dst, n, name)} images")
+            shutil.rmtree(dst); tgz.unlink()
         except Exception as e:   # one source failing must not stop the run
             print(f"  {name}: skipped ({e})")
 
     own = OUT.parent / "other_training"
     if own.exists():
-        k = 0
-        for p in own.rglob("*"):
-            if p.suffix.lower() in IMG_EXT and resize_one(p, OTHER_DIR / f"orora_{k:04d}.jpg"):
-                k += 1
-        print(f"  Orora's own 'other' photos: {k}")
+        print(f"  Orora's own 'other' photos: {take_images(own, 10_000, 'orora')}")
 
 n_other = len(list(OTHER_DIR.glob("*.jpg")))
 print("'Not droppings' images:", n_other)
