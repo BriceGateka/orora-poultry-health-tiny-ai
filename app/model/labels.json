@@ -1,17 +1,21 @@
 {
-  "model": "orora_droppings_v0",
+  "model": "orora_droppings_v1",
+  "file": "orora_droppings_v1_fp16.tflite",
   "classes": [
     "healthy",
     "cocci",
     "salmo",
-    "ncd"
+    "ncd",
+    "other"
   ],
   "labels_en": [
     "Healthy",
     "Coccidiosis",
     "Salmonellosis",
-    "Newcastle disease"
+    "Newcastle disease",
+    "Not droppings"
   ],
+  "reject_class": "other",
   "input": {
     "size": [
       224,

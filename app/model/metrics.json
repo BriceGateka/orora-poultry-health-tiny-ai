@@ -1,90 +1,116 @@
 {
-  "model": "orora_droppings_v0",
+  "model": "orora_droppings_v1",
   "backbone": "MobileNetV3Small",
   "img_size": 224,
-  "train_n": 4638,
-  "val_n": 928,
-  "v2_test": {
+  "classes": [
+    "healthy",
+    "cocci",
+    "salmo",
+    "ncd",
+    "other"
+  ],
+  "train_n": 5637,
+  "val_n": 1128,
+  "test_n": 1128,
+  "test": {
     "Healthy": {
-      "precision": 0.9593220338983051,
-      "recall": 0.9658703071672355,
-      "f1-score": 0.9625850340136054,
+      "precision": 0.9368770764119602,
+      "recall": 0.962457337883959,
+      "f1-score": 0.9494949494949495,
       "support": 293.0
     },
     "Coccidiosis": {
-      "precision": 0.9963898916967509,
-      "recall": 0.9822064056939501,
-      "f1-score": 0.989247311827957,
-      "support": 281.0
+      "precision": 0.9857142857142858,
+      "recall": 0.9787234042553191,
+      "f1-score": 0.9822064056939501,
+      "support": 282.0
     },
     "Salmonellosis": {
-      "precision": 0.9864864864864865,
-      "recall": 0.9733333333333334,
-      "f1-score": 0.9798657718120806,
+      "precision": 0.9824561403508771,
+      "recall": 0.9333333333333333,
+      "f1-score": 0.9572649572649573,
       "support": 300.0
     },
     "Newcastle disease": {
-      "precision": 0.85,
-      "recall": 0.9444444444444444,
-      "f1-score": 0.8947368421052632,
-      "support": 54.0
+      "precision": 0.875,
+      "recall": 0.9423076923076923,
+      "f1-score": 0.9074074074074074,
+      "support": 52.0
     },
-    "accuracy": 0.9719827586206896,
+    "Not droppings": {
+      "precision": 0.970873786407767,
+      "recall": 0.9950248756218906,
+      "f1-score": 0.9828009828009828,
+      "support": 201.0
+    },
+    "accuracy": 0.9636524822695035,
     "macro avg": {
-      "precision": 0.9480496030203857,
-      "recall": 0.966463622659741,
-      "f1-score": 0.9566087399397266,
-      "support": 928.0
+      "precision": 0.950184257776978,
+      "recall": 0.9623693286804389,
+      "f1-score": 0.9558349405324493,
+      "support": 1128.0
     },
     "weighted avg": {
-      "precision": 0.9729664455225607,
-      "recall": 0.9719827586206896,
-      "f1-score": 0.9722968002230071,
-      "support": 928.0
+      "precision": 0.9644139052600685,
+      "recall": 0.9636524822695035,
+      "f1-score": 0.9637339508115108,
+      "support": 1128.0
     }
   },
   "pcr": {
     "Healthy": {
-      "precision": 0.66796875,
-      "recall": 0.49279538904899134,
-      "f1-score": 0.5671641791044776,
+      "precision": 0.6008403361344538,
+      "recall": 0.41210374639769454,
+      "f1-score": 0.4888888888888889,
       "support": 347.0
     },
     "Coccidiosis": {
-      "precision": 0.9253112033195021,
-      "recall": 0.5978552278820375,
-      "f1-score": 0.7263843648208469,
+      "precision": 0.9783783783783784,
+      "recall": 0.48525469168900803,
+      "f1-score": 0.6487455197132617,
       "support": 373.0
     },
     "Salmonellosis": {
-      "precision": 0.6212121212121212,
-      "recall": 0.9398280802292264,
-      "f1-score": 0.7480045610034207,
+      "precision": 0.6731182795698925,
+      "recall": 0.8968481375358166,
+      "f1-score": 0.769041769041769,
       "support": 349.0
     },
     "Newcastle disease": {
-      "precision": 0.7521739130434782,
-      "recall": 0.9301075268817204,
-      "f1-score": 0.8317307692307693,
+      "precision": 0.75,
+      "recall": 0.9354838709677419,
+      "f1-score": 0.8325358851674641,
       "support": 186.0
     },
-    "accuracy": 0.7131474103585658,
+    "Not droppings": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "accuracy": 0.6462151394422311,
     "macro avg": {
-      "precision": 0.7416664968937754,
-      "recall": 0.740146556010494,
-      "f1-score": 0.7183209685398786,
+      "precision": 0.6004673988165449,
+      "recall": 0.5459380893180522,
+      "f1-score": 0.5478424125622767,
       "support": 1255.0
     },
     "weighted avg": {
-      "precision": 0.7439311659101924,
-      "recall": 0.7131474103585658,
-      "f1-score": 0.7039863371271287,
+      "precision": 0.7552549891184726,
+      "recall": 0.6462151394422311,
+      "f1-score": 0.6652380679953919,
       "support": 1255.0
     }
+  },
+  "guard": {
+    "not_droppings_refused": 0.9950248756218906,
+    "not_droppings_called_healthy": 0.0,
+    "droppings_wrongly_refused": 0.006472491909385114
   },
   "dedup_removed_from_train": 0,
   "data": [
     "Machuve et al., Zenodo 10.5281/zenodo.4628934 (CC BY 4.0)",
-    "Machuve et al., Zenodo 10.5281/zenodo.5801834 (CC BY 4.0)"
+    "Machuve et al., Zenodo 10.5281/zenodo.5801834 (CC BY 4.0)",
+    "Imagenette (fast.ai) and DTD (Cimpoi et al.): research use, 'not droppings' class"
   ]
 }
