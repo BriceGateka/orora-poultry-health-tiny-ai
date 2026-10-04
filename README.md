@@ -77,7 +77,7 @@ We report the lab-confirmed column first: it is the honest one. For Newcastle di
 - **Four conditions only.** Gumboro, fowl typhoid, fowl pox, worms, avian influenza and other diseases are not covered; such cases fall into the nearest class or "unclear", which is why a vet always confirms.
 - **Droppings only.** Respiratory signs, behaviour and mortality are not seen. A healthy-looking dropping does not prove a healthy flock.
 - **Small and noisy labels.** v2 labels are farm-assigned; only 1,255 photos (186 Newcastle) are lab-confirmed.
-- **It cannot yet tell droppings from other things.** The deployed model (v0) gives a result for any photo. The confidence threshold flags many unclear photos and a vet confirms every case, but a "not droppings" class is the next step: it is already built into the training notebook (with Imagenette and the Describable Textures Dataset as research-use negatives, to be replaced by Orora's own farm photos), and not yet deployed.
+- **It cannot yet tell droppings from other things.** The deployed model (v0) gives a result for any photo. The confidence threshold flags many unclear photos and a vet confirms every case, but a "not droppings" class is the next step. We trained it (model v1, with Imagenette and the Describable Textures Dataset as research-use negatives): it refused **99.5%** of non-droppings test photos and called none of them healthy, but accuracy on the lab-confirmed set fell from **71% to 65%**, with Newcastle detection unchanged (93.5%). We kept v0 for this submission and will retrain the guard on Orora's own farm photos before deploying it.
 
 ## Tech stack
 
