@@ -1,3 +1,5 @@
+<p align="center"><img src="app/logo.png" alt="Inkoko AI logo" width="180"></p>
+
 # Inkoko AI: Small AI for poultry health
 
 **Inkoko AI by Orora AgriTech**: an offline early warning for poultry disease, for smallholder farmers in Burundi. *Inkoko* means chicken in Kirundi. A phone photo of fresh droppings is read **on the device**, with no internet. The farmer gets plain advice in **Kirundi**, French or English, and alerts a vet by WhatsApp or SMS.

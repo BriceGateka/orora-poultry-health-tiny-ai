@@ -1,10 +1,11 @@
 // Orora AgriTech: service worker. Caches everything needed to run with no network.
 // Bump VERSION whenever app files or the model change.
-const VERSION = "orora-v0.16";
+const VERSION = "orora-v0.17";
 const TFLITE = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.10/";
 const SHELL = [
   "./", "index.html", "styles.css", "app.js", "config.js", "i18n.js",
-  "manifest.webmanifest", "icon.svg",
+  "manifest.webmanifest", "logo-badge.png", "favicon.png", "apple-touch-icon.png",
+  "icon-192.png", "icon-512.png", "icon-maskable-512.png",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js",
   TFLITE + "dist/tf-tflite.min.js",
   // the TFLite runtime picks the SIMD build where the phone supports it, else the plain one
