@@ -284,7 +284,7 @@ $("#export").addEventListener("click", () => {
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-  a.download = `orora_records_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `inkoko_ai_records_${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
 });
 
