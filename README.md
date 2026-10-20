@@ -4,7 +4,7 @@
 
 **Inkoko AI by Orora AgriTech**: an offline early warning for poultry disease, for smallholder farmers in Burundi. *Inkoko* means chicken in Kirundi. A phone photo of fresh droppings is read **on the device**, with no internet. The farmer gets plain advice in **Kirundi**, French or English, and alerts a vet by WhatsApp or SMS.
 
-- **Live app:** https://agritech.ororaagro.com (Kirundi: https://agritech.ororaagro.com/?lang=rn)
+- **Live app:** https://inkoko-ai.ororaagro.com (Kirundi: https://inkoko-ai.ororaagro.com/?lang=rn)
 - **Challenge:** Hack-Nation 7th Global AI Hackathon, Challenge 4, *Small AI for Development* (The World Bank), sector **agriculture**
 - **Built by:** Orora Agro Group, Bujumbura, Burundi, an integrated poultry company with a hatchery and veterinary arm
 
