@@ -26,14 +26,25 @@
   ],
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/",
       "has": [
         {
           "type": "host",
           "value": "inkokoai.ororaagro.com"
         }
       ],
-      "destination": "https://inkoko-ai.ororaagro.com/:path*",
+      "destination": "https://inkoko-ai.ororaagro.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
+      "has": [
+        {
+          "type": "host",
+          "value": "inkokoai.ororaagro.com"
+        }
+      ],
+      "destination": "https://inkoko-ai.ororaagro.com/:path+",
       "permanent": true
     }
   ]
